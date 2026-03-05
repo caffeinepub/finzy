@@ -10,19 +10,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import {
+  Activity,
   BarChart2,
+  Bell,
   BookOpen,
   Check,
   CheckCircle2,
   ChevronRight,
   Clock,
+  Globe,
   GraduationCap,
+  Hourglass,
   IndianRupee,
+  LayoutGrid,
+  LineChart,
   Loader2,
   Menu,
   MessageCircle,
+  Newspaper,
+  PiggyBank,
   ShieldCheck,
   Sparkles,
+  Star,
   Target,
   TrendingUp,
   Users,
@@ -1113,7 +1122,7 @@ function AboutSection() {
 // ── What You Will Learn ───────────────────────────────────
 const learnCards = [
   {
-    icon: TrendingUp,
+    icon: LineChart,
     title: "ETF Investing Basics",
     description:
       "Learn what ETFs are and why they are beginner-friendly. Understand index funds, expense ratios, and why ETFs outperform most active funds.",
@@ -1122,7 +1131,7 @@ const learnCards = [
     tagText: "oklch(0.50 0.16 160)",
   },
   {
-    icon: Wallet,
+    icon: PiggyBank,
     title: "Saving Strategies for Students",
     description:
       "Understand how students can save money from small income. From the 50/30/20 rule to student-specific saving hacks.",
@@ -1131,7 +1140,7 @@ const learnCards = [
     tagText: "oklch(0.27 0.09 255)",
   },
   {
-    icon: Clock,
+    icon: Hourglass,
     title: "Long-Term Investing Mindset",
     description:
       "Learn the power of patience and compounding. See how ₹500/month invested at 20 years old becomes ₹1 crore+ by retirement.",
@@ -1140,7 +1149,7 @@ const learnCards = [
     tagText: "oklch(0.50 0.17 41)",
   },
   {
-    icon: BarChart2,
+    icon: LayoutGrid,
     title: "Simple Portfolio Concepts",
     description:
       "Understand diversification and basic portfolio thinking. Learn why not putting all your eggs in one basket actually matters.",
@@ -1410,9 +1419,9 @@ function WhyEarlySection() {
       icon: TrendingUp,
       title: "Small amounts, big results",
       description:
-        "Small amounts invested early can grow over time. ₹500/month for 30 years at 12% = ₹1.76 Cr.",
-      stat: "₹1.76 Cr",
-      statLabel: "from ₹500/mo",
+        "Small amounts invested early can grow over time. ₹500/month for 20 years at 18% (ETF averaging) = ₹13.27 Lakh.",
+      stat: "₹1.33 Cr",
+      statLabel: "from ₹500/mo (18% p.a.)",
     },
     {
       icon: IndianRupee,
@@ -1506,7 +1515,20 @@ function WhyEarlySection() {
           ))}
         </div>
 
-        {/* Compound chart — SIP ₹500 vs ₹1000 @ 12% p.a. for 20 years */}
+        {/* Compound chart — SIP ₹500 vs ₹1000 @ 18% p.a. for 20 years */}
+        {/*
+          SIP Formula: M × ((1+r)^n - 1) / r  where r = 0.18/12 = 0.015, n = months
+          Year 0: 0
+          Year 5 (n=60):  ₹500 → ₹52,343  | ₹1000 → ₹1,04,686
+          Year 10 (n=120): ₹500 → ₹1,82,947 | ₹1000 → ₹3,65,894
+          Year 15 (n=180): ₹500 → ₹5,09,775 | ₹1000 → ₹10,19,550
+          Year 20 (n=240): ₹500 → ₹13,27,491 | ₹1000 → ₹26,54,982
+          SVG viewBox: 0 0 700 200
+          Y-axis: max = ₹27,00,000 → y=10; min = 0 → y=170
+          Scale: y = 170 - (value × 160 / 2700000)
+          ₹500: 170, 166.9, 159.2, 139.8, 91.3
+          ₹1000: 170, 163.8, 148.3, 109.6, 12.7
+        */}
         <div
           className="reveal rounded-2xl p-6 sm:p-8"
           style={{
@@ -1521,8 +1543,7 @@ function WhyEarlySection() {
                 Compounding in Action
               </h3>
               <p className="text-white/60 text-sm mt-1">
-                SIP @ 12% p.a. for 20 years — see how small monthly amounts grow
-                big
+                SIP @ 18% p.a. for 20 years — ETF averaging ka power dekho
               </p>
             </div>
             <div className="flex gap-6">
@@ -1543,21 +1564,6 @@ function WhyEarlySection() {
             </div>
           </div>
 
-          {/* SVG Chart */}
-          {/* 
-            SIP Formula: M × ((1+r)^n - 1) / r  where r = 0.12/12 = 0.01, n = months
-            Year 0: 0
-            Year 5 (n=60):  ₹500 → ₹40,981  | ₹1000 → ₹81,940
-            Year 10 (n=120): ₹500 → ₹1,16,170 | ₹1000 → ₹2,32,339
-            Year 15 (n=180): ₹500 → ₹2,51,290 | ₹1000 → ₹5,02,580
-            Year 20 (n=240): ₹500 → ₹4,94,629 | ₹1000 → ₹9,89,255
-            SVG viewBox: 0 0 700 200
-            Y-axis: max = ₹10,00,000 → maps to y=10; min = 0 → y=170
-            Scale: y = 170 - (value/1000000)*160
-            X-axis: Year 0=50, Year 5=185, Year 10=320, Year 15=455, Year 20=590
-          -->
-          {/* ₹500: y values: 170, 170-6.5=163.4, 170-18.6=151.4, 170-40.2=129.8, 170-79.1=90.9 */}
-          {/* ₹1000: y values: 170, 170-13.1=156.9, 170-37.2=132.8, 170-80.4=89.6, 170-158.3=11.7 */}
           <svg
             viewBox="0 0 700 200"
             fill="none"
@@ -1662,7 +1668,7 @@ function WhyEarlySection() {
               fillOpacity="0.4"
               fontSize="9"
             >
-              ₹10L
+              ₹27L
             </text>
             <text
               x="36"
@@ -1672,7 +1678,7 @@ function WhyEarlySection() {
               fillOpacity="0.4"
               fontSize="9"
             >
-              ₹7.5L
+              ₹20L
             </text>
             <text
               x="36"
@@ -1682,7 +1688,7 @@ function WhyEarlySection() {
               fillOpacity="0.4"
               fontSize="9"
             >
-              ₹5L
+              ₹13L
             </text>
             <text
               x="36"
@@ -1692,7 +1698,7 @@ function WhyEarlySection() {
               fillOpacity="0.4"
               fontSize="9"
             >
-              ₹2.5L
+              ₹7L
             </text>
             <text
               x="36"
@@ -1707,17 +1713,17 @@ function WhyEarlySection() {
 
             {/* Area fills */}
             <path
-              d="M50 170 L185 156.9 L320 132.8 L455 89.6 L590 11.7 L590 170 Z"
+              d="M50 170 L185 163.8 L320 148.3 L455 109.6 L590 12.7 L590 170 Z"
               fill="url(#sipAreaFill1000)"
             />
             <path
-              d="M50 170 L185 163.4 L320 151.4 L455 129.8 L590 90.9 L590 170 Z"
+              d="M50 170 L185 166.9 L320 159.2 L455 139.8 L590 91.3 L590 170 Z"
               fill="url(#sipAreaFill500)"
             />
 
             {/* ₹500/month line */}
             <path
-              d="M50 170 L185 163.4 L320 151.4 L455 129.8 L590 90.9"
+              d="M50 170 L185 166.9 L320 159.2 L455 139.8 L590 91.3"
               stroke="url(#sipGrad500)"
               strokeWidth="2.5"
               strokeLinecap="round"
@@ -1727,7 +1733,7 @@ function WhyEarlySection() {
 
             {/* ₹1000/month line */}
             <path
-              d="M50 170 L185 156.9 L320 132.8 L455 89.6 L590 11.7"
+              d="M50 170 L185 163.8 L320 148.3 L455 109.6 L590 12.7"
               stroke="url(#sipGrad1000)"
               strokeWidth="3"
               strokeLinecap="round"
@@ -1740,10 +1746,10 @@ function WhyEarlySection() {
             {/* Data points — ₹500 line */}
             {[
               { x: 50, y: 170, end: false },
-              { x: 185, y: 163.4, end: false },
-              { x: 320, y: 151.4, end: false },
-              { x: 455, y: 129.8, end: false },
-              { x: 590, y: 90.9, end: true },
+              { x: 185, y: 166.9, end: false },
+              { x: 320, y: 159.2, end: false },
+              { x: 455, y: 139.8, end: false },
+              { x: 590, y: 91.3, end: true },
             ].map((p) => (
               <circle
                 key={`p500-x${p.x}`}
@@ -1758,10 +1764,10 @@ function WhyEarlySection() {
             {/* Data points — ₹1000 line */}
             {[
               { x: 50, y: 170, end: false },
-              { x: 185, y: 156.9, end: false },
-              { x: 320, y: 132.8, end: false },
-              { x: 455, y: 89.6, end: false },
-              { x: 590, y: 11.7, end: true },
+              { x: 185, y: 163.8, end: false },
+              { x: 320, y: 148.3, end: false },
+              { x: 455, y: 109.6, end: false },
+              { x: 590, y: 12.7, end: true },
             ].map((p) => (
               <circle
                 key={`p1000-x${p.x}`}
@@ -1776,12 +1782,12 @@ function WhyEarlySection() {
             {/* End value labels */}
             <text
               x="596"
-              y="9"
+              y="10"
               fill="oklch(0.80 0.18 155)"
               fontSize="10"
               fontWeight="bold"
             >
-              ₹9.89L
+              ₹26.55L
             </text>
             <text
               x="596"
@@ -1790,7 +1796,7 @@ function WhyEarlySection() {
               fontSize="10"
               fontWeight="bold"
             >
-              ₹4.95L
+              ₹13.27L
             </text>
 
             {/* X-axis year labels */}
@@ -1830,13 +1836,13 @@ function WhyEarlySection() {
               <div>
                 <p className="text-white/60 text-xs">₹1,000/month × 20 yrs</p>
                 <p className="text-white font-display font-bold text-xl">
-                  ₹9,89,255
+                  ₹26,54,982
                 </p>
                 <p
                   className="text-xs"
                   style={{ color: "oklch(0.80 0.18 155)" }}
                 >
-                  Invested: ₹2,40,000 • Profit: ₹7,49,255
+                  Invested: ₹2,40,000 • Profit: ₹24,14,982
                 </p>
               </div>
             </div>
@@ -1859,13 +1865,13 @@ function WhyEarlySection() {
               <div>
                 <p className="text-white/60 text-xs">₹500/month × 20 yrs</p>
                 <p className="text-white font-display font-bold text-xl">
-                  ₹4,94,628
+                  ₹13,27,491
                 </p>
                 <p
                   className="text-xs"
                   style={{ color: "oklch(0.70 0.12 220)" }}
                 >
-                  Invested: ₹1,20,000 • Profit: ₹3,74,628
+                  Invested: ₹1,20,000 • Profit: ₹12,07,491
                 </p>
               </div>
             </div>
@@ -1882,7 +1888,7 @@ function WhyEarlySection() {
               }}
             >
               <Sparkles className="w-3 h-3" />
-              12% p.a. return (SIP compounding)
+              18% p.a. return (ETF averaging — SIP compounding)
             </div>
           </div>
         </div>
@@ -1893,14 +1899,82 @@ function WhyEarlySection() {
 
 // ── Pricing Section ───────────────────────────────────────
 function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
-  const features = [
-    "ETF investing education",
-    "Student saving strategies",
-    "Simple investing knowledge",
-    "Community learning support",
-    "Beginner-friendly financial education",
-    "Simple market understanding",
-    "Community learning environment",
+  const plans = [
+    {
+      name: "Starter",
+      badge: "🎓 Free First Month",
+      price: "99",
+      subtitle: "after your free trial month",
+      highlight: false,
+      popular: false,
+      description:
+        "Perfect for students just starting their financial journey.",
+      features: [
+        { icon: BookOpen, text: "ETF investing education (basics)" },
+        { icon: Wallet, text: "Student saving strategies" },
+        { icon: GraduationCap, text: "Beginner-friendly financial education" },
+        { icon: BarChart2, text: "Simple market understanding" },
+        { icon: Users, text: "Community learning environment" },
+        { icon: TrendingUp, text: "Simple investing knowledge" },
+        { icon: IndianRupee, text: "SIP & compounding calculators" },
+      ],
+      cta: "Start Free Trial →",
+      ocid: "pricing.starter_button",
+      accentColor: "oklch(0.50 0.16 160)",
+      accentBg: "oklch(0.67 0.18 160 / 0.12)",
+    },
+    {
+      name: "Advanced",
+      badge: "🔥 Most Popular",
+      price: "399",
+      subtitle: "per month",
+      highlight: true,
+      popular: true,
+      description:
+        "For serious students who want deeper market insights & tools.",
+      features: [
+        { icon: BookOpen, text: "Everything in Starter" },
+        { icon: Activity, text: "Live market monitoring dashboard" },
+        { icon: BarChart2, text: "Daily data insights & analytics" },
+        { icon: Newspaper, text: "Real-time financial news feed" },
+        { icon: TrendingUp, text: "ETF & index fund deep-dives" },
+        { icon: Globe, text: "Global market information" },
+        { icon: Target, text: "Advanced portfolio strategies" },
+        { icon: Bell, text: "Market alerts & notifications" },
+        { icon: Zap, text: "Weekly live Q&A sessions" },
+      ],
+      cta: "Get Advanced →",
+      ocid: "pricing.advanced_button",
+      accentColor: "oklch(0.80 0.18 155)",
+      accentBg: "oklch(0.67 0.18 160 / 0.2)",
+    },
+    {
+      name: "Premium",
+      badge: "⭐ All Access",
+      price: "999",
+      subtitle: "per month",
+      highlight: false,
+      popular: false,
+      description:
+        "Complete financial education suite — everything Finzy has to offer.",
+      features: [
+        { icon: Star, text: "Everything in Advanced" },
+        { icon: Activity, text: "Real-time live stock screener" },
+        { icon: BarChart2, text: "Advanced technical analysis basics" },
+        { icon: Newspaper, text: "Curated daily market briefings" },
+        { icon: Globe, text: "International market coverage (US, EU, Asia)" },
+        { icon: TrendingUp, text: "Sector & thematic investing guides" },
+        { icon: Bell, text: "Custom portfolio alerts & tracking" },
+        { icon: Zap, text: "1-on-1 monthly mentorship session" },
+        { icon: ShieldCheck, text: "Options & derivatives education (basics)" },
+        { icon: GraduationCap, text: "Certification of financial literacy" },
+        { icon: Users, text: "Exclusive premium Discord community" },
+      ],
+      cta: "Go Premium →",
+      ocid: "pricing.premium_button",
+      accentColor: "oklch(0.75 0.15 41)",
+      accentBg: "oklch(0.75 0.15 41 / 0.12)",
+    },
   ];
 
   return (
@@ -1932,92 +2006,192 @@ function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto reveal" data-ocid="pricing.card">
-          {/* Main pricing card */}
-          <div
-            className="pricing-glow rounded-3xl overflow-hidden"
-            style={{
-              background:
-                "linear-gradient(160deg, oklch(0.22 0.085 255) 0%, oklch(0.18 0.08 255) 100%)",
-            }}
-          >
-            {/* Top badge */}
+        <div
+          className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start"
+          data-ocid="pricing.card"
+        >
+          {plans.map((plan, idx) => (
             <div
-              className="text-center py-3 text-sm font-semibold"
-              style={{ background: "oklch(0.67 0.18 160)", color: "white" }}
+              key={plan.name}
+              className={`reveal reveal-delay-${idx + 1} rounded-3xl overflow-hidden flex flex-col relative ${plan.popular ? "pricing-glow lg:-mt-4 lg:mb-4" : ""}`}
+              style={{
+                background: plan.highlight
+                  ? "linear-gradient(160deg, oklch(0.22 0.085 255) 0%, oklch(0.18 0.08 255) 100%)"
+                  : "oklch(0.98 0.004 240)",
+                border: plan.highlight
+                  ? "none"
+                  : `1.5px solid ${idx === 2 ? "oklch(0.75 0.15 41 / 0.25)" : "oklch(0.88 0.015 240)"}`,
+                boxShadow: plan.highlight
+                  ? "0 24px 60px oklch(0.22 0.085 255 / 0.25)"
+                  : undefined,
+              }}
             >
-              🎓 Finzy Student Plan — Most Popular
-            </div>
-
-            <div className="p-8 sm:p-10">
-              {/* Price */}
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-3 mb-3">
-                  <div
-                    className="px-4 py-2 rounded-full text-sm font-bold"
-                    style={{
-                      background: "oklch(0.67 0.18 160 / 0.2)",
-                      color: "oklch(0.80 0.18 155)",
-                    }}
-                  >
-                    Free for first month
-                  </div>
-                </div>
-
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-2xl font-display text-white/60">₹</span>
-                  <span className="text-7xl font-display font-black text-white">
-                    99
-                  </span>
-                  <span className="text-xl text-white/60">/month</span>
-                </div>
-                <p className="text-white/50 text-sm mt-2">
-                  after your free trial month
-                </p>
+              {/* Badge strip */}
+              <div
+                className="text-center py-2.5 text-xs font-bold tracking-wide"
+                style={{
+                  background: plan.highlight
+                    ? "oklch(0.67 0.18 160)"
+                    : idx === 2
+                      ? "oklch(0.75 0.15 41 / 0.15)"
+                      : "oklch(0.27 0.09 255 / 0.07)",
+                  color: plan.highlight
+                    ? "white"
+                    : idx === 2
+                      ? "oklch(0.55 0.14 41)"
+                      : "oklch(0.35 0.07 255)",
+                }}
+              >
+                {plan.badge}
               </div>
 
-              {/* Features */}
-              <ul className="space-y-3 mb-8">
-                {features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
+              <div className="p-7 flex flex-col flex-1">
+                {/* Plan name */}
+                <h3
+                  className="text-xl font-display font-bold mb-1"
+                  style={{
+                    color: plan.highlight ? "white" : "oklch(0.16 0.07 255)",
+                  }}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className="text-xs mb-6 leading-relaxed"
+                  style={{
+                    color: plan.highlight
+                      ? "oklch(1 0 0 / 0.55)"
+                      : "oklch(0.55 0.04 255)",
+                  }}
+                >
+                  {plan.description}
+                </p>
+
+                {/* Price */}
+                <div className="mb-6">
+                  {plan.name === "Starter" && (
                     <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                      style={{ background: "oklch(0.67 0.18 160 / 0.2)" }}
+                      className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+                      style={{
+                        background: "oklch(0.67 0.18 160 / 0.15)",
+                        color: "oklch(0.50 0.16 160)",
+                      }}
                     >
-                      <Check
-                        className="w-3 h-3"
-                        style={{ color: "oklch(0.80 0.18 155)" }}
-                      />
+                      Free for first month
                     </div>
-                    <span className="text-sm text-white/80">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                  )}
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      className="text-xl font-display"
+                      style={{
+                        color: plan.highlight
+                          ? "oklch(1 0 0 / 0.5)"
+                          : "oklch(0.55 0.04 255)",
+                      }}
+                    >
+                      ₹
+                    </span>
+                    <span
+                      className="text-5xl font-display font-black"
+                      style={{
+                        color: plan.highlight
+                          ? "white"
+                          : "oklch(0.16 0.07 255)",
+                      }}
+                    >
+                      {plan.price}
+                    </span>
+                    <span
+                      className="text-sm"
+                      style={{
+                        color: plan.highlight
+                          ? "oklch(1 0 0 / 0.5)"
+                          : "oklch(0.55 0.04 255)",
+                      }}
+                    >
+                      /mo
+                    </span>
+                  </div>
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color: plan.highlight
+                        ? "oklch(1 0 0 / 0.4)"
+                        : "oklch(0.65 0.04 255)",
+                    }}
+                  >
+                    {plan.subtitle}
+                  </p>
+                </div>
 
-              {/* CTA */}
-              <button
-                type="button"
-                onClick={onTrialClick}
-                className="w-full btn-finzy-green py-4 rounded-xl text-lg font-bold"
-                data-ocid="pricing.primary_button"
-              >
-                Start Free Trial →
-              </button>
+                {/* Features list */}
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f.text} className="flex items-start gap-2.5">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                        style={{ background: plan.accentBg }}
+                      >
+                        <Check
+                          className="w-3 h-3"
+                          style={{ color: plan.accentColor }}
+                        />
+                      </div>
+                      <span
+                        className="text-sm leading-snug"
+                        style={{
+                          color: plan.highlight
+                            ? "oklch(1 0 0 / 0.78)"
+                            : "oklch(0.35 0.04 255)",
+                        }}
+                      >
+                        {f.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
 
-              <p className="text-center text-white/40 text-xs mt-4">
-                No credit card required. Cancel anytime.
-              </p>
+                {/* CTA */}
+                <button
+                  type="button"
+                  onClick={onTrialClick}
+                  className={`w-full py-3.5 rounded-xl text-base font-bold transition-all ${plan.highlight ? "btn-finzy-green" : ""}`}
+                  data-ocid={plan.ocid}
+                  style={
+                    !plan.highlight
+                      ? {
+                          background: plan.accentBg,
+                          color: plan.accentColor,
+                          border: `1.5px solid ${plan.accentColor}`,
+                        }
+                      : undefined
+                  }
+                >
+                  {plan.cta}
+                </button>
+
+                {plan.name === "Starter" && (
+                  <p
+                    className="text-center text-xs mt-3"
+                    style={{
+                      color: "oklch(0.65 0.04 255)",
+                    }}
+                  >
+                    No credit card required. Cancel anytime.
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Trust line */}
-          <p
-            className="text-center mt-6 text-sm"
-            style={{ color: "oklch(0.50 0.04 255)" }}
-          >
-            ✨ Built for students who want to learn investing early.
-          </p>
+          ))}
         </div>
+
+        {/* Trust line */}
+        <p
+          className="text-center mt-10 text-sm reveal"
+          style={{ color: "oklch(0.50 0.04 255)" }}
+        >
+          ✨ Built for students who want to learn investing early. All plans
+          include education only — not financial advice.
+        </p>
       </div>
     </section>
   );
