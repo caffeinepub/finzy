@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { useActor } from "./useActor";
 
 export function useGetSignupCount() {
@@ -29,11 +30,23 @@ export function useGetSignups() {
 
 export function useAddSignup() {
   const { actor } = useActor();
+  const actorRef = useRef(actor);
+  actorRef.current = actor;
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ name, email }: { name: string; email: string }) => {
-      if (!actor) throw new Error("Actor not ready");
-      return actor.addSignup(name, email);
+      // Wait up to 15s for actor to become available
+      let resolvedActor = actorRef.current;
+      if (!resolvedActor) {
+        for (let i = 0; i < 30; i++) {
+          await new Promise((r) => setTimeout(r, 500));
+          resolvedActor = actorRef.current;
+          if (resolvedActor) break;
+        }
+      }
+      if (!resolvedActor)
+        throw new Error("Unable to connect. Please refresh and try again.");
+      return resolvedActor.addSignup(name, email);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["signupCount"] });

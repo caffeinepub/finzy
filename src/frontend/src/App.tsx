@@ -106,8 +106,12 @@ function SignupModal({ open, onOpenChange }: SignupModalProps) {
           setSuccess(true);
           toast.success("Welcome to Finzy! We'll connect with you soon.");
         },
-        onError: () => {
-          toast.error("Something went wrong. Please try again.");
+        onError: (err: unknown) => {
+          const msg =
+            err instanceof Error
+              ? err.message
+              : "Something went wrong. Please try again.";
+          toast.error(msg);
         },
       },
     );
