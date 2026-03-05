@@ -1506,13 +1506,14 @@ function WhyEarlySection() {
           ))}
         </div>
 
-        {/* Compound chart */}
+        {/* Compound chart — SIP ₹500 vs ₹1000 @ 12% p.a. for 20 years */}
         <div
           className="reveal rounded-2xl p-6 sm:p-8"
           style={{
             background: "oklch(1 0 0 / 0.05)",
             border: "1px solid oklch(1 0 0 / 0.1)",
           }}
+          data-ocid="compounding.chart_point"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -1520,7 +1521,8 @@ function WhyEarlySection() {
                 Compounding in Action
               </h3>
               <p className="text-white/60 text-sm mt-1">
-                ₹25,000 invested at 18% p.a. — grows to ₹41,076 in 3 years
+                SIP @ 12% p.a. for 20 years — see how small monthly amounts grow
+                big
               </p>
             </div>
             <div className="flex gap-6">
@@ -1529,84 +1531,360 @@ function WhyEarlySection() {
                   className="w-3 h-3 rounded-full"
                   style={{ background: "oklch(0.80 0.18 155)" }}
                 />
-                <span className="text-white/70 text-sm">Starting at 20</span>
+                <span className="text-white/70 text-sm">₹1,000/month</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/40" />
-                <span className="text-white/70 text-sm">Starting at 30</span>
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ background: "oklch(0.70 0.12 220)" }}
+                />
+                <span className="text-white/70 text-sm">₹500/month</span>
               </div>
             </div>
           </div>
+
+          {/* SVG Chart */}
+          {/* 
+            SIP Formula: M × ((1+r)^n - 1) / r  where r = 0.12/12 = 0.01, n = months
+            Year 0: 0
+            Year 5 (n=60):  ₹500 → ₹40,981  | ₹1000 → ₹81,940
+            Year 10 (n=120): ₹500 → ₹1,16,170 | ₹1000 → ₹2,32,339
+            Year 15 (n=180): ₹500 → ₹2,51,290 | ₹1000 → ₹5,02,580
+            Year 20 (n=240): ₹500 → ₹4,94,629 | ₹1000 → ₹9,89,255
+            SVG viewBox: 0 0 700 200
+            Y-axis: max = ₹10,00,000 → maps to y=10; min = 0 → y=170
+            Scale: y = 170 - (value/1000000)*160
+            X-axis: Year 0=50, Year 5=185, Year 10=320, Year 15=455, Year 20=590
+          -->
+          {/* ₹500: y values: 170, 170-6.5=163.4, 170-18.6=151.4, 170-40.2=129.8, 170-79.1=90.9 */}
+          {/* ₹1000: y values: 170, 170-13.1=156.9, 170-37.2=132.8, 170-80.4=89.6, 170-158.3=11.7 */}
           <svg
-            viewBox="0 0 700 180"
+            viewBox="0 0 700 200"
             fill="none"
             className="w-full"
             aria-hidden="true"
           >
-            {/* Grid */}
-            {[40, 80, 120, 160].map((y) => (
+            <defs>
+              <linearGradient
+                id="sipGrad1000"
+                x1="50"
+                y1="0"
+                x2="590"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="oklch(0.67 0.18 160)" stopOpacity="0.3" />
+                <stop
+                  offset="1"
+                  stopColor="oklch(0.80 0.18 155)"
+                  stopOpacity="0.6"
+                />
+              </linearGradient>
+              <linearGradient
+                id="sipGrad500"
+                x1="50"
+                y1="0"
+                x2="590"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="oklch(0.60 0.12 220)" stopOpacity="0.2" />
+                <stop
+                  offset="1"
+                  stopColor="oklch(0.70 0.12 220)"
+                  stopOpacity="0.4"
+                />
+              </linearGradient>
+              <linearGradient
+                id="sipAreaFill1000"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="200"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="oklch(0.80 0.18 155)" stopOpacity="0.18" />
+                <stop
+                  offset="1"
+                  stopColor="oklch(0.80 0.18 155)"
+                  stopOpacity="0"
+                />
+              </linearGradient>
+              <linearGradient
+                id="sipAreaFill500"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="200"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="oklch(0.70 0.12 220)" stopOpacity="0.12" />
+                <stop
+                  offset="1"
+                  stopColor="oklch(0.70 0.12 220)"
+                  stopOpacity="0"
+                />
+              </linearGradient>
+            </defs>
+
+            {/* Grid lines */}
+            {[50, 90, 130, 170].map((y) => (
               <line
                 key={y}
-                x1="0"
+                x1="40"
                 y1={y}
-                x2="700"
+                x2="660"
                 y2={y}
                 stroke="white"
                 strokeWidth="0.5"
-                strokeOpacity="0.1"
+                strokeOpacity="0.12"
               />
             ))}
-            {[0, 100, 200, 300, 400, 500, 600, 700].map((x) => (
+            {[50, 185, 320, 455, 590].map((x) => (
               <line
                 key={x}
                 x1={x}
-                y1="0"
+                y1="10"
                 x2={x}
-                y2="180"
+                y2="175"
                 stroke="white"
                 strokeWidth="0.5"
                 strokeOpacity="0.1"
               />
             ))}
 
-            {/* Starting at 30 (shorter, lower) */}
+            {/* Y-axis value labels */}
+            <text
+              x="36"
+              y="14"
+              textAnchor="end"
+              fill="white"
+              fillOpacity="0.4"
+              fontSize="9"
+            >
+              ₹10L
+            </text>
+            <text
+              x="36"
+              y="54"
+              textAnchor="end"
+              fill="white"
+              fillOpacity="0.4"
+              fontSize="9"
+            >
+              ₹7.5L
+            </text>
+            <text
+              x="36"
+              y="94"
+              textAnchor="end"
+              fill="white"
+              fillOpacity="0.4"
+              fontSize="9"
+            >
+              ₹5L
+            </text>
+            <text
+              x="36"
+              y="134"
+              textAnchor="end"
+              fill="white"
+              fillOpacity="0.4"
+              fontSize="9"
+            >
+              ₹2.5L
+            </text>
+            <text
+              x="36"
+              y="174"
+              textAnchor="end"
+              fill="white"
+              fillOpacity="0.4"
+              fontSize="9"
+            >
+              ₹0
+            </text>
+
+            {/* Area fills */}
             <path
-              d="M0 170 L100 168 L200 165 L300 158 L400 145 L500 125 L600 95 L700 55"
-              stroke="white"
-              strokeWidth="2"
-              strokeOpacity="0.4"
-              strokeLinecap="round"
-              fill="none"
+              d="M50 170 L185 156.9 L320 132.8 L455 89.6 L590 11.7 L590 170 Z"
+              fill="url(#sipAreaFill1000)"
+            />
+            <path
+              d="M50 170 L185 163.4 L320 151.4 L455 129.8 L590 90.9 L590 170 Z"
+              fill="url(#sipAreaFill500)"
             />
 
-            {/* Starting at 20 (longer, higher) */}
+            {/* ₹500/month line */}
             <path
-              d="M0 170 L100 165 L200 155 L300 135 L400 105 L500 68 L600 30 L700 5"
-              stroke="oklch(0.80 0.18 155)"
+              d="M50 170 L185 163.4 L320 151.4 L455 129.8 L590 90.9"
+              stroke="url(#sipGrad500)"
               strokeWidth="2.5"
               strokeLinecap="round"
-              ref={compoundRef}
-              style={{ strokeDasharray: 1000, strokeDashoffset: 1000 }}
+              strokeLinejoin="round"
               fill="none"
             />
 
-            {/* Labels */}
-            <text x="10" y="174" fill="white" fillOpacity="0.5" fontSize="10">
-              5yr
+            {/* ₹1000/month line */}
+            <path
+              d="M50 170 L185 156.9 L320 132.8 L455 89.6 L590 11.7"
+              stroke="url(#sipGrad1000)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              ref={compoundRef}
+              style={{ strokeDasharray: 1200, strokeDashoffset: 1200 }}
+              fill="none"
+            />
+
+            {/* Data points — ₹500 line */}
+            {[
+              { x: 50, y: 170, end: false },
+              { x: 185, y: 163.4, end: false },
+              { x: 320, y: 151.4, end: false },
+              { x: 455, y: 129.8, end: false },
+              { x: 590, y: 90.9, end: true },
+            ].map((p) => (
+              <circle
+                key={`p500-x${p.x}`}
+                cx={p.x}
+                cy={p.y}
+                r={p.end ? 5 : 3}
+                fill="oklch(0.70 0.12 220)"
+                opacity={p.end ? 1 : 0.7}
+              />
+            ))}
+
+            {/* Data points — ₹1000 line */}
+            {[
+              { x: 50, y: 170, end: false },
+              { x: 185, y: 156.9, end: false },
+              { x: 320, y: 132.8, end: false },
+              { x: 455, y: 89.6, end: false },
+              { x: 590, y: 11.7, end: true },
+            ].map((p) => (
+              <circle
+                key={`p1000-x${p.x}`}
+                cx={p.x}
+                cy={p.y}
+                r={p.end ? 6 : 3}
+                fill="oklch(0.80 0.18 155)"
+                opacity={p.end ? 1 : 0.8}
+              />
+            ))}
+
+            {/* End value labels */}
+            <text
+              x="596"
+              y="9"
+              fill="oklch(0.80 0.18 155)"
+              fontSize="10"
+              fontWeight="bold"
+            >
+              ₹9.89L
             </text>
-            <text x="150" y="174" fill="white" fillOpacity="0.5" fontSize="10">
-              15yr
+            <text
+              x="596"
+              y="88"
+              fill="oklch(0.70 0.12 220)"
+              fontSize="10"
+              fontWeight="bold"
+            >
+              ₹4.95L
             </text>
-            <text x="300" y="174" fill="white" fillOpacity="0.5" fontSize="10">
-              25yr
-            </text>
-            <text x="450" y="174" fill="white" fillOpacity="0.5" fontSize="10">
-              35yr
-            </text>
-            <text x="620" y="174" fill="white" fillOpacity="0.5" fontSize="10">
-              40yr
-            </text>
+
+            {/* X-axis year labels */}
+            {["Yr 0", "Yr 5", "Yr 10", "Yr 15", "Yr 20"].map((label, i) => (
+              <text
+                key={label}
+                x={[50, 185, 320, 455, 590][i]}
+                y="188"
+                textAnchor="middle"
+                fill="white"
+                fillOpacity="0.5"
+                fontSize="9.5"
+              >
+                {label}
+              </text>
+            ))}
           </svg>
+
+          {/* End amount summary cards */}
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div
+              className="rounded-xl px-5 py-4 flex items-center gap-4"
+              style={{
+                background: "oklch(0.80 0.18 155 / 0.1)",
+                border: "1px solid oklch(0.80 0.18 155 / 0.25)",
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: "oklch(0.80 0.18 155 / 0.15)" }}
+              >
+                <TrendingUp
+                  className="w-5 h-5"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+              </div>
+              <div>
+                <p className="text-white/60 text-xs">₹1,000/month × 20 yrs</p>
+                <p className="text-white font-display font-bold text-xl">
+                  ₹9,89,255
+                </p>
+                <p
+                  className="text-xs"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                >
+                  Invested: ₹2,40,000 • Profit: ₹7,49,255
+                </p>
+              </div>
+            </div>
+            <div
+              className="rounded-xl px-5 py-4 flex items-center gap-4"
+              style={{
+                background: "oklch(0.70 0.12 220 / 0.1)",
+                border: "1px solid oklch(0.70 0.12 220 / 0.25)",
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: "oklch(0.70 0.12 220 / 0.15)" }}
+              >
+                <IndianRupee
+                  className="w-5 h-5"
+                  style={{ color: "oklch(0.70 0.12 220)" }}
+                />
+              </div>
+              <div>
+                <p className="text-white/60 text-xs">₹500/month × 20 yrs</p>
+                <p className="text-white font-display font-bold text-xl">
+                  ₹4,94,628
+                </p>
+                <p
+                  className="text-xs"
+                  style={{ color: "oklch(0.70 0.12 220)" }}
+                >
+                  Invested: ₹1,20,000 • Profit: ₹3,74,628
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Rate badge */}
+          <div className="mt-4 flex items-center gap-2">
+            <div
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full"
+              style={{
+                background: "oklch(0.67 0.18 160 / 0.15)",
+                color: "oklch(0.80 0.18 155)",
+                border: "1px solid oklch(0.67 0.18 160 / 0.3)",
+              }}
+            >
+              <Sparkles className="w-3 h-3" />
+              12% p.a. return (SIP compounding)
+            </div>
+          </div>
         </div>
       </div>
     </section>
