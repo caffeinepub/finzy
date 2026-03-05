@@ -89,9 +89,16 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface Signup {
+    name: string;
+    email: string;
+    timestamp: Time;
+}
+export type Time = bigint;
 export interface backendInterface {
     addSignup(name: string, email: string): Promise<void>;
     getSignupCount(): Promise<bigint>;
+    getSignups(): Promise<Array<Signup>>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
@@ -120,6 +127,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getSignupCount();
+            return result;
+        }
+    }
+    async getSignups(): Promise<Array<Signup>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSignups();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSignups();
             return result;
         }
     }

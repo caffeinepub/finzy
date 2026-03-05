@@ -14,6 +14,19 @@ export function useGetSignupCount() {
   });
 }
 
+export function useGetSignups() {
+  const { actor, isFetching } = useActor();
+  return useQuery({
+    queryKey: ["signups"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getSignups();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 30_000,
+  });
+}
+
 export function useAddSignup() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -24,6 +37,7 @@ export function useAddSignup() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["signupCount"] });
+      queryClient.invalidateQueries({ queryKey: ["signups"] });
     },
   });
 }

@@ -1,6 +1,5 @@
 import List "mo:core/List";
 import Time "mo:core/Time";
-import Text "mo:core/Text";
 
 actor {
   type Signup = {
@@ -22,5 +21,9 @@ actor {
 
   public query ({ caller }) func getSignupCount() : async Nat {
     signups.size();
+  };
+
+  public query ({ caller }) func getSignups() : async [Signup] {
+    signups.toArray();
   };
 };

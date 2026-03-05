@@ -7,7 +7,14 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface Signup {
+    name: string;
+    email: string;
+    timestamp: Time;
+}
+export type Time = bigint;
 export interface backendInterface {
     addSignup(name: string, email: string): Promise<void>;
     getSignupCount(): Promise<bigint>;
+    getSignups(): Promise<Array<Signup>>;
 }

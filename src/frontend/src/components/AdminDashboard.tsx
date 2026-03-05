@@ -7,20 +7,23 @@ import {
   Bell,
   CheckCheck,
   Database,
+  Download,
   GraduationCap,
   Loader2,
   Lock,
   LogOut,
+  Mail,
   MessageCircle,
+  RefreshCw,
   ShieldCheck,
   TrendingUp,
+  User,
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGetSignupCount } from "../hooks/useQueries";
+import { useGetSignupCount, useGetSignups } from "../hooks/useQueries";
 
 const LS_KEY = "finzy_last_seen_count";
-
 const ADMIN_PASSWORD = "finzy2024";
 
 // ── Password Gate ─────────────────────────────────────────
@@ -32,7 +35,6 @@ function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsChecking(true);
-    // Slight delay for UX feedback
     setTimeout(() => {
       if (password === ADMIN_PASSWORD) {
         onSuccess();
@@ -52,28 +54,13 @@ function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
           "linear-gradient(135deg, oklch(0.14 0.07 255) 0%, oklch(0.18 0.09 248) 50%, oklch(0.22 0.11 240) 100%)",
       }}
     >
-      {/* Background grid */}
       <div
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 40px,
-            oklch(1 0 0 / 0.04) 40px,
-            oklch(1 0 0 / 0.04) 41px
-          ),
-          repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 40px,
-            oklch(1 0 0 / 0.04) 40px,
-            oklch(1 0 0 / 0.04) 41px
-          )`,
+          backgroundImage:
+            "repeating-linear-gradient(0deg,transparent,transparent 40px,oklch(1 0 0 / 0.04) 40px,oklch(1 0 0 / 0.04) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,oklch(1 0 0 / 0.04) 40px,oklch(1 0 0 / 0.04) 41px)",
         }}
       />
-
-      {/* Glow orbs */}
       <div
         className="absolute top-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none"
         style={{ background: "oklch(0.67 0.18 160 / 0.08)" }}
@@ -91,7 +78,6 @@ function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
           backdropFilter: "blur(20px)",
         }}
       >
-        {/* Top accent */}
         <div
           className="h-1 w-full"
           style={{
@@ -101,7 +87,6 @@ function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
         />
 
         <div className="p-8 sm:p-10">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -269,9 +254,7 @@ function StatCard({
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{
-            background: accent
-              ? `${accent} / 0.15`
-              : "oklch(0.67 0.18 160 / 0.15)",
+            background: "oklch(0.67 0.18 160 / 0.15)",
           }}
         >
           <Icon
@@ -340,15 +323,12 @@ function NewSignupsBanner({
       }}
       data-ocid="admin.panel"
     >
-      {/* Subtle animated glow */}
       <div
         className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-2xl pointer-events-none"
         style={{ background: "oklch(0.67 0.18 160 / 0.20)" }}
       />
-
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          {/* Pulsing bell */}
           <div
             className="relative w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: "oklch(0.67 0.18 160 / 0.25)" }}
@@ -357,18 +337,13 @@ function NewSignupsBanner({
               className="w-6 h-6"
               style={{ color: "oklch(0.85 0.18 155)" }}
             />
-            {/* Pulse dot */}
             <span
               className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold animate-bounce"
-              style={{
-                background: "oklch(0.67 0.18 160)",
-                color: "white",
-              }}
+              style={{ background: "oklch(0.67 0.18 160)", color: "white" }}
             >
               {newCount > 9 ? "9+" : newCount}
             </span>
           </div>
-
           <div>
             <p
               className="font-display font-bold text-base mb-0.5"
@@ -387,7 +362,6 @@ function NewSignupsBanner({
             </p>
           </div>
         </div>
-
         <button
           type="button"
           onClick={onMarkSeen}
@@ -397,6 +371,7 @@ function NewSignupsBanner({
             background: "oklch(0.67 0.18 160 / 0.30)",
             border: "1px solid oklch(0.67 0.18 160 / 0.50)",
             color: "oklch(0.90 0.15 155)",
+            cursor: "pointer",
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background =
@@ -415,206 +390,353 @@ function NewSignupsBanner({
   );
 }
 
-// ── Recent Activity Section ────────────────────────────────
-function RecentActivitySection({
-  totalCount,
-  newCount,
-  isLoading,
-}: {
-  totalCount: number | null;
-  newCount: number;
-  isLoading: boolean;
-}) {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const dateStr = now.toLocaleDateString("en-IN", {
+// ── Signup List Table ─────────────────────────────────────
+type SignupRecord = {
+  name: string;
+  email: string;
+  timestamp: bigint;
+};
+
+function formatTimestamp(ts: bigint): string {
+  // ICP timestamps are in nanoseconds
+  const ms = Number(ts) / 1_000_000;
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime()) || date.getFullYear() < 2020) {
+    return "—";
+  }
+  return date.toLocaleString("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+}
+
+function exportToCSV(signups: SignupRecord[]) {
+  const header = ["#", "Name", "Email", "Timestamp"];
+  const rows = signups.map((s, i) => [
+    String(i + 1),
+    `"${s.name.replace(/"/g, '""')}"`,
+    `"${s.email.replace(/"/g, '""')}"`,
+    `"${formatTimestamp(s.timestamp)}"`,
+  ]);
+  const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `finzy-signups-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function SignupListSection({
+  signups,
+  isLoading,
+  onRefresh,
+}: {
+  signups: SignupRecord[];
+  isLoading: boolean;
+  onRefresh: () => void;
+}) {
+  const [search, setSearch] = useState("");
+
+  const filtered = signups.filter(
+    (s) =>
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.email.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div
-      className="rounded-2xl overflow-hidden mb-6"
+      className="rounded-2xl overflow-hidden"
       style={{
         background: "oklch(1 0 0 / 0.03)",
         border: "1px solid oklch(1 0 0 / 0.08)",
       }}
+      data-ocid="admin.table"
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-6 py-4"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-6 py-4"
         style={{ borderBottom: "1px solid oklch(1 0 0 / 0.08)" }}
       >
         <div className="flex items-center gap-3">
-          <Bell className="w-5 h-5" style={{ color: "oklch(0.80 0.18 155)" }} />
+          <Users
+            className="w-5 h-5"
+            style={{ color: "oklch(0.80 0.18 155)" }}
+          />
           <h2
             className="font-display font-bold text-base"
             style={{ color: "white" }}
           >
-            Recent Activity
+            Student Signups
           </h2>
-        </div>
-        <div
-          className="px-3 py-1 rounded-full text-xs font-semibold"
-          style={{
-            background: "oklch(0.27 0.09 255 / 0.15)",
-            color: "oklch(0.70 0.12 255)",
-            border: "1px solid oklch(0.27 0.09 255 / 0.25)",
-          }}
-        >
-          {dateStr} · {timeStr}
-        </div>
-      </div>
-
-      <div className="p-6 space-y-4">
-        {/* New badge row — shown when new signups detected */}
-        {newCount > 0 && (
           <div
-            className="flex items-center gap-4 p-4 rounded-xl"
+            className="px-3 py-1 rounded-full text-xs font-semibold"
             style={{
-              background: "oklch(0.22 0.12 160 / 0.20)",
-              border: "1px solid oklch(0.67 0.18 160 / 0.30)",
+              background: "oklch(0.27 0.09 255 / 0.15)",
+              color: "oklch(0.70 0.12 255)",
+              border: "1px solid oklch(0.27 0.09 255 / 0.25)",
             }}
-            data-ocid="admin.row"
           >
-            <div className="relative shrink-0">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: "oklch(0.67 0.18 160 / 0.20)" }}
-              >
-                <Users
-                  className="w-5 h-5"
-                  style={{ color: "oklch(0.80 0.18 155)" }}
-                />
-              </div>
-              {/* Pulsing NEW badge */}
-              <span
-                className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold animate-pulse"
-                style={{
-                  background: "oklch(0.67 0.18 160)",
-                  color: "white",
-                }}
-              >
-                NEW
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p
-                className="font-semibold text-sm"
-                style={{ color: "oklch(0.90 0.15 155)" }}
-              >
-                {newCount} new registration{newCount !== 1 ? "s" : ""}
-              </p>
-              <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.50)" }}>
-                Just now · since last visit
-              </p>
-            </div>
-            <div
-              className="px-2 py-1 rounded-full text-xs font-semibold shrink-0"
-              style={{
-                background: "oklch(0.67 0.18 160 / 0.20)",
-                color: "oklch(0.80 0.18 155)",
-              }}
-            >
-              +{newCount}
-            </div>
+            {isLoading ? "Loading..." : `${signups.length} registered`}
           </div>
-        )}
+        </div>
 
-        {/* Total count row */}
-        <div
-          className="flex items-center gap-4 p-4 rounded-xl"
-          style={{
-            background: "oklch(1 0 0 / 0.04)",
-            border: "1px solid oklch(1 0 0 / 0.07)",
-          }}
-          data-ocid="admin.row"
-        >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "oklch(0.27 0.09 255 / 0.15)" }}
-          >
-            <Database
-              className="w-5 h-5"
-              style={{ color: "oklch(0.70 0.12 255)" }}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Search */}
+          <div className="relative flex-1 sm:flex-none">
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              data-ocid="admin.search_input"
+              className="h-9 text-sm pr-3 pl-3 sm:w-52"
+              style={{
+                background: "oklch(1 0 0 / 0.06)",
+                border: "1px solid oklch(1 0 0 / 0.12)",
+                color: "white",
+              }}
             />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-white">
-              Total registrations on-chain
-            </p>
-            <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.45)" }}>
-              Stored securely on Internet Computer
-            </p>
-          </div>
-          <div
-            className="text-xl font-display font-black shrink-0"
-            style={{ color: "white" }}
+
+          {/* Refresh */}
+          <button
+            type="button"
+            onClick={onRefresh}
+            title="Refresh"
+            data-ocid="admin.secondary_button"
+            className="h-9 w-9 rounded-lg flex items-center justify-center transition-all"
+            style={{
+              background: "oklch(1 0 0 / 0.06)",
+              border: "1px solid oklch(1 0 0 / 0.12)",
+              color: "oklch(1 0 0 / 0.55)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "oklch(1 0 0 / 0.12)";
+              (e.currentTarget as HTMLButtonElement).style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "oklch(1 0 0 / 0.06)";
+              (e.currentTarget as HTMLButtonElement).style.color =
+                "oklch(1 0 0 / 0.55)";
+            }}
           >
-            {isLoading ? (
-              <div
-                className="h-6 w-10 rounded animate-pulse"
-                style={{ background: "oklch(1 0 0 / 0.12)" }}
-                data-ocid="admin.loading_state"
-              />
-            ) : (
-              (totalCount ?? 0).toLocaleString("en-IN")
-            )}
-          </div>
-        </div>
+            <RefreshCw className="w-4 h-4" />
+          </button>
 
-        {/* Admin note */}
-        <div
-          className="rounded-xl px-4 py-3"
-          style={{
-            background: "oklch(0.27 0.09 255 / 0.08)",
-            border: "1px solid oklch(0.27 0.09 255 / 0.15)",
-          }}
-        >
-          <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.55)" }}>
-            📋 Admin notification system — check regularly for new
-            registrations. Student name &amp; email are stored on-chain.
-          </p>
-        </div>
-
-        {/* WhatsApp quick contact */}
-        <div
-          className="flex items-center gap-3 px-4 py-3 rounded-xl"
-          style={{
-            background: "oklch(0.40 0.18 150 / 0.12)",
-            border: "1px solid oklch(0.67 0.18 160 / 0.25)",
-          }}
-        >
-          <MessageCircle
-            className="w-4 h-4 shrink-0"
-            style={{ color: "oklch(0.80 0.18 155)" }}
-          />
-          <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.65)" }}>
-            Share community link on WhatsApp:{" "}
-            <a
-              href="https://wa.me/917587170451"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold"
-              style={{ color: "oklch(0.80 0.18 155)" }}
-            >
-              +91 75871 70451
-            </a>
-          </p>
+          {/* CSV Export */}
+          <button
+            type="button"
+            onClick={() => exportToCSV(signups)}
+            disabled={signups.length === 0}
+            data-ocid="admin.primary_button"
+            className="h-9 flex items-center gap-2 px-3 rounded-lg text-sm font-semibold transition-all"
+            style={{
+              background:
+                signups.length === 0
+                  ? "oklch(0.67 0.18 160 / 0.10)"
+                  : "oklch(0.67 0.18 160 / 0.25)",
+              border: "1px solid oklch(0.67 0.18 160 / 0.35)",
+              color:
+                signups.length === 0
+                  ? "oklch(0.80 0.18 155 / 0.40)"
+                  : "oklch(0.85 0.18 155)",
+              cursor: signups.length === 0 ? "not-allowed" : "pointer",
+            }}
+            onMouseEnter={(e) => {
+              if (signups.length > 0) {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "oklch(0.67 0.18 160 / 0.45)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (signups.length > 0) {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "oklch(0.67 0.18 160 / 0.25)";
+              }
+            }}
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
         </div>
       </div>
+
+      {/* Table body */}
+      {isLoading ? (
+        <div className="px-6 py-12 text-center" data-ocid="admin.loading_state">
+          <Loader2
+            className="w-8 h-8 animate-spin mx-auto mb-3"
+            style={{ color: "oklch(0.80 0.18 155)" }}
+          />
+          <p className="text-sm" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+            Loading signup data from blockchain...
+          </p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="px-6 py-14 text-center" data-ocid="admin.empty_state">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: "oklch(0.27 0.09 255 / 0.10)" }}
+          >
+            <Users
+              className="w-7 h-7"
+              style={{ color: "oklch(0.55 0.10 255)" }}
+            />
+          </div>
+          <h3
+            className="font-display font-bold text-lg mb-2"
+            style={{ color: "white" }}
+          >
+            {search ? "No results found" : "No signups yet"}
+          </h3>
+          <p className="text-sm" style={{ color: "oklch(1 0 0 / 0.45)" }}>
+            {search
+              ? `No student found matching "${search}"`
+              : "When students register, their details will appear here."}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          {/* Column headers */}
+          <div
+            className="grid gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider"
+            style={{
+              gridTemplateColumns: "40px 1fr 1fr 160px",
+              background: "oklch(1 0 0 / 0.03)",
+              color: "oklch(1 0 0 / 0.35)",
+              borderBottom: "1px solid oklch(1 0 0 / 0.06)",
+            }}
+          >
+            <span>#</span>
+            <span>
+              <User className="w-3 h-3 inline mr-1" />
+              Name
+            </span>
+            <span>
+              <Mail className="w-3 h-3 inline mr-1" />
+              Email
+            </span>
+            <span>Registered</span>
+          </div>
+
+          {/* Rows */}
+          {filtered.map((signup, idx) => (
+            <div
+              key={`${signup.email}-${idx}`}
+              className="grid gap-4 px-6 py-4 transition-colors"
+              style={{
+                gridTemplateColumns: "40px 1fr 1fr 160px",
+                borderBottom: "1px solid oklch(1 0 0 / 0.04)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background =
+                  "oklch(1 0 0 / 0.03)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background =
+                  "transparent";
+              }}
+              data-ocid={`admin.item.${idx + 1}`}
+            >
+              {/* Index */}
+              <span
+                className="text-sm font-mono font-bold"
+                style={{ color: "oklch(1 0 0 / 0.30)" }}
+              >
+                {idx + 1}
+              </span>
+
+              {/* Name */}
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold"
+                  style={{
+                    background: "oklch(0.67 0.18 160 / 0.18)",
+                    color: "oklch(0.80 0.18 155)",
+                  }}
+                >
+                  {signup.name.trim().charAt(0).toUpperCase()}
+                </div>
+                <span
+                  className="text-sm font-medium truncate"
+                  style={{ color: "white" }}
+                >
+                  {signup.name}
+                </span>
+              </div>
+
+              {/* Email */}
+              <a
+                href={`mailto:${signup.email}`}
+                className="text-sm truncate transition-colors"
+                style={{ color: "oklch(0.70 0.12 255)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color =
+                    "oklch(0.80 0.14 255)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color =
+                    "oklch(0.70 0.12 255)";
+                }}
+              >
+                {signup.email}
+              </a>
+
+              {/* Timestamp */}
+              <span
+                className="text-xs"
+                style={{ color: "oklch(1 0 0 / 0.40)" }}
+              >
+                {formatTimestamp(signup.timestamp)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer summary */}
+      {!isLoading && filtered.length > 0 && (
+        <div
+          className="px-6 py-3 text-xs"
+          style={{
+            borderTop: "1px solid oklch(1 0 0 / 0.06)",
+            color: "oklch(1 0 0 / 0.35)",
+          }}
+        >
+          Showing {filtered.length} of {signups.length} student
+          {signups.length !== 1 ? "s" : ""} · Data stored on Internet Computer
+          blockchain
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Dashboard ─────────────────────────────────────────────
 function Dashboard({ onLogout }: { onLogout: () => void }) {
-  const { data: signupCount, isLoading } = useGetSignupCount();
+  const { data: signupCount, isLoading: countLoading } = useGetSignupCount();
+  const {
+    data: signupsRaw,
+    isLoading: signupsLoading,
+    refetch: refetchSignups,
+  } = useGetSignups();
+
   const count = signupCount !== undefined ? Number(signupCount) : null;
+
+  // Normalize signup records
+  const signups: SignupRecord[] = (signupsRaw ?? []).map((s: any) => ({
+    name: String(s.name ?? ""),
+    email: String(s.email ?? ""),
+    timestamp: BigInt(s.timestamp ?? 0),
+  }));
 
   // ── New signup detection via localStorage ──
   const [lastSeenCount, setLastSeenCount] = useState<number>(() => {
@@ -625,11 +747,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const newCount =
     count !== null && count > lastSeenCount ? count - lastSeenCount : 0;
 
-  // Persist lastSeenCount on unmount/cleanup only when count loads
   useEffect(() => {
     if (count !== null && count > 0 && lastSeenCount === 0) {
-      // First visit ever — seed last seen to current (no false positives)
-      // Only auto-seed if there's no stored value at all
       if (!localStorage.getItem(LS_KEY)) {
         localStorage.setItem(LS_KEY, String(count));
         setLastSeenCount(count);
@@ -656,20 +775,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       <div
         className="fixed inset-0 pointer-events-none opacity-15"
         style={{
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 48px,
-            oklch(1 0 0 / 0.04) 48px,
-            oklch(1 0 0 / 0.04) 49px
-          ),
-          repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 48px,
-            oklch(1 0 0 / 0.04) 48px,
-            oklch(1 0 0 / 0.04) 49px
-          )`,
+          backgroundImage:
+            "repeating-linear-gradient(0deg,transparent,transparent 48px,oklch(1 0 0 / 0.04) 48px,oklch(1 0 0 / 0.04) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,oklch(1 0 0 / 0.04) 48px,oklch(1 0 0 / 0.04) 49px)",
         }}
       />
 
@@ -748,6 +855,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 background: "oklch(1 0 0 / 0.06)",
                 border: "1px solid oklch(1 0 0 / 0.10)",
                 color: "oklch(1 0 0 / 0.65)",
+                cursor: "pointer",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background =
@@ -779,7 +887,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             Signup Overview
           </h1>
           <p className="text-sm" style={{ color: "oklch(1 0 0 / 0.50)" }}>
-            Real-time data from the Internet Computer blockchain
+            Real-time student registrations from the Internet Computer
+            blockchain
           </p>
         </div>
 
@@ -793,7 +902,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             label="Total Signups"
             value={count !== null ? count.toLocaleString("en-IN") : "—"}
             sub="All time registrations"
-            isLoading={isLoading}
+            isLoading={countLoading}
           />
           <StatCard
             icon={TrendingUp}
@@ -844,142 +953,48 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 <span style={{ color: "oklch(0.80 0.18 155)" }}>
                   Internet Computer blockchain
                 </span>
-                . Each signup record includes the student's{" "}
+                . Each record includes the student's{" "}
                 <strong className="text-white/80">Name</strong>,{" "}
                 <strong className="text-white/80">Email</strong>, and{" "}
-                <strong className="text-white/80">Timestamp</strong>. Data is
-                tamper-proof and decentralized — no central server required.
+                <strong className="text-white/80">Timestamp</strong>. Use the
+                Export CSV button to download all data.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <RecentActivitySection
-          totalCount={count}
-          newCount={newCount}
-          isLoading={isLoading}
-        />
-
-        {/* Signup list section */}
+        {/* WhatsApp contact */}
         <div
-          className="rounded-2xl overflow-hidden"
+          className="flex items-center gap-3 px-5 py-4 rounded-2xl mb-6"
           style={{
-            background: "oklch(1 0 0 / 0.03)",
-            border: "1px solid oklch(1 0 0 / 0.08)",
+            background: "oklch(0.40 0.18 150 / 0.12)",
+            border: "1px solid oklch(0.67 0.18 160 / 0.25)",
           }}
         >
-          {/* Table header */}
-          <div
-            className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: "1px solid oklch(1 0 0 / 0.08)" }}
-          >
-            <div className="flex items-center gap-3">
-              <Users
-                className="w-5 h-5"
-                style={{ color: "oklch(0.80 0.18 155)" }}
-              />
-              <h2
-                className="font-display font-bold text-base"
-                style={{ color: "white" }}
-              >
-                Student Signups
-              </h2>
-            </div>
-            <div
-              className="px-3 py-1 rounded-full text-xs font-semibold"
-              style={{
-                background: "oklch(0.27 0.09 255 / 0.15)",
-                color: "oklch(0.70 0.12 255)",
-                border: "1px solid oklch(0.27 0.09 255 / 0.25)",
-              }}
+          <MessageCircle
+            className="w-4 h-4 shrink-0"
+            style={{ color: "oklch(0.80 0.18 155)" }}
+          />
+          <p className="text-sm" style={{ color: "oklch(1 0 0 / 0.65)" }}>
+            WhatsApp community:{" "}
+            <a
+              href="https://wa.me/917587170451"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold"
+              style={{ color: "oklch(0.80 0.18 155)" }}
             >
-              {isLoading
-                ? "Loading..."
-                : `${count !== null ? count : 0} registered`}
-            </div>
-          </div>
-
-          {/* Coming soon body */}
-          <div className="px-6 py-12 text-center">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
-              style={{ background: "oklch(0.27 0.09 255 / 0.10)" }}
-            >
-              <ShieldCheck
-                className="w-8 h-8"
-                style={{ color: "oklch(0.55 0.10 255)" }}
-              />
-            </div>
-            <h3
-              className="font-display font-bold text-xl mb-3"
-              style={{ color: "white" }}
-            >
-              Full Export Coming Soon
-            </h3>
-            <p
-              className="text-sm leading-relaxed max-w-md mx-auto mb-4"
-              style={{ color: "oklch(1 0 0 / 0.50)" }}
-            >
-              Detailed signup list with name and email export will be available
-              in the next update. All data is safely stored on-chain.
-            </p>
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
-              style={{
-                background: "oklch(0.67 0.18 160 / 0.12)",
-                color: "oklch(0.80 0.18 155)",
-                border: "1px solid oklch(0.67 0.18 160 / 0.20)",
-              }}
-            >
-              <Users className="w-4 h-4" />
-              Current total:{" "}
-              {isLoading
-                ? "..."
-                : `${count !== null ? count : 0} students registered`}
-            </div>
-          </div>
-
-          {/* Column headers (preview) */}
-          <div
-            className="px-6 pb-4"
-            style={{ borderTop: "1px solid oklch(1 0 0 / 0.05)" }}
-          >
-            <div
-              className="grid grid-cols-3 gap-4 px-4 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider"
-              style={{
-                background: "oklch(1 0 0 / 0.03)",
-                color: "oklch(1 0 0 / 0.30)",
-              }}
-            >
-              <span>#</span>
-              <span>Name / Email</span>
-              <span>Timestamp</span>
-            </div>
-            {/* Skeleton rows */}
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="grid grid-cols-3 gap-4 px-4 py-3 mt-1"
-                style={{ opacity: 0.15 - i * 0.04 }}
-                data-ocid={`admin.item.${i}`}
-              >
-                <div
-                  className="h-4 rounded"
-                  style={{ background: "oklch(1 0 0 / 0.12)", width: "24px" }}
-                />
-                <div
-                  className="h-4 rounded"
-                  style={{ background: "oklch(1 0 0 / 0.12)" }}
-                />
-                <div
-                  className="h-4 rounded"
-                  style={{ background: "oklch(1 0 0 / 0.12)" }}
-                />
-              </div>
-            ))}
-          </div>
+              +91 75871 70451
+            </a>
+          </p>
         </div>
+
+        {/* Signup List Table */}
+        <SignupListSection
+          signups={signups}
+          isLoading={signupsLoading}
+          onRefresh={() => refetchSignups()}
+        />
 
         {/* Footer note */}
         <p

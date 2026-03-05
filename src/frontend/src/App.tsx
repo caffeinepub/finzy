@@ -74,21 +74,37 @@ interface SignupModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const COUNTRY_CODES = [
+  { code: "+91", flag: "🇮🇳", label: "India (+91)" },
+  { code: "+1", flag: "🇺🇸", label: "USA (+1)" },
+  { code: "+44", flag: "🇬🇧", label: "UK (+44)" },
+  { code: "+971", flag: "🇦🇪", label: "UAE (+971)" },
+  { code: "+61", flag: "🇦🇺", label: "Australia (+61)" },
+  { code: "+65", flag: "🇸🇬", label: "Singapore (+65)" },
+  { code: "+60", flag: "🇲🇾", label: "Malaysia (+60)" },
+  { code: "+880", flag: "🇧🇩", label: "Bangladesh (+880)" },
+];
+
 function SignupModal({ open, onOpenChange }: SignupModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
   const [success, setSuccess] = useState(false);
   const { mutate, isPending } = useAddSignup();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    if (!name.trim() || !email.trim() || !phone.trim()) return;
+    const fullPhone = `${countryCode}${phone.trim()}`;
+    // Store name with phone appended so admin can see it
+    const nameWithPhone = `${name.trim()} [${fullPhone}]`;
     mutate(
-      { name: name.trim(), email: email.trim() },
+      { name: nameWithPhone, email: email.trim() },
       {
         onSuccess: () => {
           setSuccess(true);
-          toast.success("Finzy में आपका स्वागत है! 🎉 जल्द हम आपसे connect करेंगे।");
+          toast.success("Welcome to Finzy! We'll connect with you soon.");
         },
         onError: () => {
           toast.error("Something went wrong. Please try again.");
@@ -102,6 +118,8 @@ function SignupModal({ open, onOpenChange }: SignupModalProps) {
       setSuccess(false);
       setName("");
       setEmail("");
+      setPhone("");
+      setCountryCode("+91");
     }
     onOpenChange(open);
   };
@@ -109,158 +127,326 @@ function SignupModal({ open, onOpenChange }: SignupModalProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-md border-0 shadow-2xl"
+        className="sm:max-w-md border-0 shadow-2xl p-0 overflow-hidden"
         data-ocid="hero.dialog"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.16 0.07 255) 0%, oklch(0.20 0.09 248) 100%)",
-          color: "white",
-        }}
       >
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-display text-white">
-            {success ? "" : "Start Your ₹1 Trial"}
-          </DialogTitle>
-          <DialogDescription className="text-white/70">
-            {success
-              ? ""
-              : "Join thousands of students learning to invest smart."}
-          </DialogDescription>
-        </DialogHeader>
+        {/* Gradient header strip */}
+        <div
+          className="px-8 pt-8 pb-6 relative overflow-hidden"
+          style={{
+            background:
+              "linear-gradient(135deg, oklch(0.16 0.07 255) 0%, oklch(0.22 0.10 245) 60%, oklch(0.30 0.13 200) 100%)",
+          }}
+        >
+          {/* Decorative orbs */}
+          <div
+            className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20 blur-2xl pointer-events-none"
+            style={{ background: "oklch(0.67 0.18 160)" }}
+          />
+          <div
+            className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full opacity-15 blur-2xl pointer-events-none"
+            style={{ background: "oklch(0.45 0.12 255)" }}
+          />
 
-        {success ? (
-          <div className="py-6 text-center" data-ocid="hero.success_state">
-            {/* Big animated checkmark */}
+          <div className="relative flex items-center gap-3 mb-1">
+            {/* Logo mark */}
             <div
-              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5 relative"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{
-                background: "oklch(0.67 0.18 160 / 0.15)",
-                border: "2px solid oklch(0.67 0.18 160 / 0.4)",
-              }}
-            >
-              <CheckCircle2
-                className="w-12 h-12"
-                style={{ color: "oklch(0.67 0.18 160)" }}
-              />
-              {/* Pulse ring */}
-              <div
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{
-                  background: "oklch(0.67 0.18 160 / 0.08)",
-                  animationDuration: "2s",
-                }}
-              />
-            </div>
-
-            {/* Hindi headline */}
-            <h3 className="text-2xl font-display font-bold text-white mb-2">
-              Registration हो गया! 🎉
-            </h3>
-            <p className="text-white/75 text-base leading-relaxed mb-5 px-2">
-              आपका Finzy ₹1 Trial शुरू हो गया है।
-              <br />
-              हम जल्द आपसे connect करेंगे।
-            </p>
-
-            {/* WhatsApp info box */}
-            <div
-              className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5 text-left"
-              style={{
-                background: "oklch(0.40 0.18 150 / 0.18)",
+                background: "oklch(0.67 0.18 160 / 0.2)",
                 border: "1px solid oklch(0.67 0.18 160 / 0.35)",
               }}
             >
+              <TrendingUp
+                className="w-5 h-5"
+                style={{ color: "oklch(0.80 0.18 155)" }}
+              />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-display font-bold text-white leading-tight">
+                Start Your Free Trial
+              </DialogTitle>
+              <DialogDescription className="text-white/60 text-xs mt-0.5">
+                Join students learning to invest smart
+              </DialogDescription>
+            </div>
+          </div>
+
+          {/* Trust badges */}
+          <div className="relative flex flex-wrap gap-2 mt-4">
+            {["Free first month", "No card needed", "Cancel anytime"].map(
+              (badge) => (
+                <span
+                  key={badge}
+                  className="text-xs px-2.5 py-1 rounded-full font-medium"
+                  style={{
+                    background: "oklch(0.67 0.18 160 / 0.15)",
+                    color: "oklch(0.85 0.18 155)",
+                    border: "1px solid oklch(0.67 0.18 160 / 0.25)",
+                  }}
+                >
+                  ✓ {badge}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+
+        {/* Form body */}
+        <div className="px-8 py-6 bg-white">
+          {success ? (
+            <div className="py-4 text-center" data-ocid="hero.success_state">
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "oklch(0.67 0.18 160 / 0.25)" }}
+                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 relative"
+                style={{
+                  background: "oklch(0.67 0.18 160 / 0.1)",
+                  border: "2px solid oklch(0.67 0.18 160 / 0.35)",
+                }}
               >
-                <MessageCircle
-                  className="w-5 h-5"
-                  style={{ color: "oklch(0.80 0.18 155)" }}
+                <CheckCircle2
+                  className="w-10 h-10"
+                  style={{ color: "oklch(0.50 0.16 160)" }}
+                />
+                <div
+                  className="absolute inset-0 rounded-full animate-ping"
+                  style={{
+                    background: "oklch(0.67 0.18 160 / 0.06)",
+                    animationDuration: "2s",
+                  }}
                 />
               </div>
-              <div>
-                <p className="text-white/60 text-xs mb-0.5">
-                  कोई सवाल है? WhatsApp करें:
-                </p>
-                <a
-                  href="https://wa.me/917587170451"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-sm"
-                  style={{ color: "oklch(0.80 0.18 155)" }}
-                >
-                  +91 75871 70451
-                </a>
-              </div>
-            </div>
 
-            <Button
-              className="w-full btn-finzy-green py-3 text-base font-semibold"
-              onClick={() => handleClose(false)}
-              data-ocid="hero.close_button"
-            >
-              Let's Start Learning! 🚀
-            </Button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            <div className="space-y-2">
-              <Label
-                htmlFor="signup-name"
-                className="text-white/80 text-sm font-medium"
+              <h3
+                className="text-2xl font-display font-bold mb-2"
+                style={{ color: "oklch(0.16 0.07 255)" }}
               >
-                Your Name
-              </Label>
-              <Input
-                id="signup-name"
-                type="text"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                data-ocid="hero.input"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[oklch(0.67_0.18_160)] focus:ring-[oklch(0.67_0.18_160)]"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="signup-email"
-                className="text-white/80 text-sm font-medium"
+                Registration done! 🎉
+              </h3>
+              <p
+                className="text-sm leading-relaxed mb-5"
+                style={{ color: "oklch(0.50 0.04 255)" }}
               >
-                Email Address
-              </Label>
-              <Input
-                id="signup-email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                data-ocid="hero.input"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-              />
+                Your Finzy Free Trial has started.
+                <br />
+                We'll reach out to you soon.
+              </p>
+
+              <div
+                className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5 text-left"
+                style={{
+                  background: "oklch(0.67 0.18 160 / 0.07)",
+                  border: "1px solid oklch(0.67 0.18 160 / 0.2)",
+                }}
+              >
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: "oklch(0.67 0.18 160 / 0.15)" }}
+                >
+                  <MessageCircle
+                    className="w-5 h-5"
+                    style={{ color: "oklch(0.50 0.16 160)" }}
+                  />
+                </div>
+                <div>
+                  <p
+                    className="text-xs mb-0.5"
+                    style={{ color: "oklch(0.50 0.04 255)" }}
+                  >
+                    Questions? WhatsApp us:
+                  </p>
+                  <a
+                    href="https://wa.me/917587170451"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-sm"
+                    style={{ color: "oklch(0.50 0.16 160)" }}
+                  >
+                    +91 75871 70451
+                  </a>
+                </div>
+              </div>
+
+              <Button
+                className="w-full btn-finzy-green py-3 text-base font-semibold"
+                onClick={() => handleClose(false)}
+                data-ocid="hero.close_button"
+              >
+                Let's Start Learning! 🚀
+              </Button>
             </div>
-            <Button
-              type="submit"
-              className="w-full btn-finzy-green py-3 text-base"
-              disabled={isPending || !name.trim() || !email.trim()}
-              data-ocid="hero.submit_button"
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Joining...
-                </>
-              ) : (
-                "Start ₹1 Trial →"
-              )}
-            </Button>
-            <p className="text-center text-white/50 text-xs">
-              No spam. Cancel anytime. First month: just ₹1.
-            </p>
-          </form>
-        )}
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="signup-name"
+                  className="text-sm font-semibold"
+                  style={{ color: "oklch(0.25 0.07 255)" }}
+                >
+                  Full Name
+                </Label>
+                <Input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  data-ocid="hero.input"
+                  className="h-11 rounded-xl text-sm"
+                  style={{
+                    border: "1.5px solid oklch(0.88 0.015 240)",
+                    background: "oklch(0.98 0.004 240)",
+                    color: "oklch(0.16 0.07 255)",
+                  }}
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="signup-email"
+                  className="text-sm font-semibold"
+                  style={{ color: "oklch(0.25 0.07 255)" }}
+                >
+                  Email Address
+                </Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  data-ocid="hero.input"
+                  className="h-11 rounded-xl text-sm"
+                  style={{
+                    border: "1.5px solid oklch(0.88 0.015 240)",
+                    background: "oklch(0.98 0.004 240)",
+                    color: "oklch(0.16 0.07 255)",
+                  }}
+                />
+              </div>
+
+              {/* Mobile Number */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="signup-phone"
+                    className="text-sm font-semibold"
+                    style={{ color: "oklch(0.25 0.07 255)" }}
+                  >
+                    Mobile Number
+                  </Label>
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{
+                      background: "oklch(0.67 0.18 160 / 0.1)",
+                      color: "oklch(0.45 0.16 160)",
+                      border: "1px solid oklch(0.67 0.18 160 / 0.2)",
+                    }}
+                  >
+                    Auto-selected: India (+91)
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  {/* Country code selector */}
+                  <div className="relative shrink-0">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      data-ocid="hero.select"
+                      className="h-11 pl-3 pr-7 rounded-xl text-sm font-semibold appearance-none cursor-pointer outline-none"
+                      style={{
+                        border: "1.5px solid oklch(0.88 0.015 240)",
+                        background: "oklch(0.98 0.004 240)",
+                        color: "oklch(0.16 0.07 255)",
+                        minWidth: "90px",
+                      }}
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.code}
+                        </option>
+                      ))}
+                    </select>
+                    {/* Dropdown chevron */}
+                    <div
+                      className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                      style={{ color: "oklch(0.55 0.04 255)" }}
+                    >
+                      <svg
+                        width="10"
+                        height="6"
+                        viewBox="0 0 10 6"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <title>Dropdown arrow</title>
+                        <path
+                          d="M1 1l4 4 4-4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Phone number input */}
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder="10-digit mobile number"
+                    value={phone}
+                    onChange={(e) =>
+                      setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                    }
+                    required
+                    data-ocid="hero.input"
+                    className="h-11 rounded-xl text-sm flex-1"
+                    style={{
+                      border: "1.5px solid oklch(0.88 0.015 240)",
+                      background: "oklch(0.98 0.004 240)",
+                      color: "oklch(0.16 0.07 255)",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                className="w-full btn-finzy-green py-3 text-base font-bold rounded-xl mt-2"
+                disabled={
+                  isPending ||
+                  !name.trim() ||
+                  !email.trim() ||
+                  phone.length < 10
+                }
+                data-ocid="hero.submit_button"
+                style={{ height: "48px" }}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  "Start Free Trial →"
+                )}
+              </Button>
+
+              <p
+                className="text-center text-xs pt-1"
+                style={{ color: "oklch(0.65 0.04 255)" }}
+              >
+                No spam. Cancel anytime. First month is free.
+              </p>
+            </form>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -460,7 +646,7 @@ function Navbar({ onTrialClick }: { onTrialClick: () => void }) {
             className="btn-finzy-green px-5 py-2 rounded-lg text-sm"
             data-ocid="nav.primary_button"
           >
-            Start ₹1 Trial
+            Start Free Trial
           </button>
         </div>
 
@@ -509,7 +695,7 @@ function Navbar({ onTrialClick }: { onTrialClick: () => void }) {
               className="btn-finzy-green px-5 py-3 rounded-lg text-sm text-left"
               data-ocid="nav.primary_button"
             >
-              Start ₹1 Trial
+              Start Free Trial
             </button>
           </div>
         </div>
@@ -613,8 +799,8 @@ function HeroSection({ onTrialClick }: { onTrialClick: () => void }) {
                 className="btn-finzy-green px-8 py-4 rounded-xl text-base font-semibold flex items-center justify-center gap-2"
                 data-ocid="hero.primary_button"
               >
-                <IndianRupee className="w-4 h-4" />
-                Start ₹1 Trial
+                <Zap className="w-4 h-4" />
+                Start Free Trial
                 <ChevronRight className="w-4 h-4" />
               </button>
               <a
@@ -635,7 +821,7 @@ function HeroSection({ onTrialClick }: { onTrialClick: () => void }) {
                   className="w-4 h-4"
                   style={{ color: "oklch(0.80 0.18 155)" }}
                 />
-                First month just ₹1
+                First month Free
               </span>
               <span className="flex items-center gap-1.5">
                 <Check
@@ -876,9 +1062,9 @@ function AboutSection() {
               },
               {
                 icon: Zap,
-                title: "Start with ₹1",
+                title: "Start Free",
                 description:
-                  "Zero barrier to entry. Trial for ₹1, then just ₹99/month after.",
+                  "Zero barrier to entry. Free trial for your first month, then just ₹99/month after.",
                 delay: "reveal-delay-3",
               },
             ].map((item) => (
@@ -1492,7 +1678,7 @@ function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
                       color: "oklch(0.80 0.18 155)",
                     }}
                   >
-                    ₹1 for first month
+                    Free for first month
                   </div>
                 </div>
 
@@ -1504,7 +1690,7 @@ function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
                   <span className="text-xl text-white/60">/month</span>
                 </div>
                 <p className="text-white/50 text-sm mt-2">
-                  after your ₹1 trial month
+                  after your free trial month
                 </p>
               </div>
 
@@ -1533,11 +1719,11 @@ function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
                 className="w-full btn-finzy-green py-4 rounded-xl text-lg font-bold"
                 data-ocid="pricing.primary_button"
               >
-                Start ₹1 Trial →
+                Start Free Trial →
               </button>
 
               <p className="text-center text-white/40 text-xs mt-4">
-                No credit card required for trial. Cancel anytime.
+                No credit card required. Cancel anytime.
               </p>
             </div>
           </div>
@@ -1770,7 +1956,7 @@ function TrustSection() {
           {[
             { value: "500+", label: "Students Learning" },
             { value: "4", label: "Core Modules" },
-            { value: "₹1", label: "Trial Price" },
+            { value: "Free", label: "Trial Price" },
             { value: "100%", label: "Education Only" },
           ].map((stat) => (
             <div key={stat.label}>
