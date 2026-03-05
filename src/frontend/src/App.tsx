@@ -1,0 +1,2022 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
+import {
+  BarChart2,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  GraduationCap,
+  IndianRupee,
+  Loader2,
+  Menu,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Users,
+  Wallet,
+  X,
+  Zap,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import AdminDashboard from "./components/AdminDashboard";
+import { FinzyLogo } from "./components/FinzyLogo";
+import { useAddSignup, useGetSignupCount } from "./hooks/useQueries";
+
+// ── Scroll reveal hook ────────────────────────────────────
+function useRevealOnScroll() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+    );
+
+    const refresh = () => {
+      const items = document.querySelectorAll(".reveal:not(.visible)");
+      for (const item of items) {
+        observer.observe(item);
+      }
+    };
+
+    refresh();
+    const timer = setInterval(refresh, 300);
+    setTimeout(() => clearInterval(timer), 5000);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(timer);
+    };
+  }, []);
+}
+
+// ── Signup Modal ──────────────────────────────────────────
+interface SignupModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+function SignupModal({ open, onOpenChange }: SignupModalProps) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [success, setSuccess] = useState(false);
+  const { mutate, isPending } = useAddSignup();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) return;
+    mutate(
+      { name: name.trim(), email: email.trim() },
+      {
+        onSuccess: () => {
+          setSuccess(true);
+          toast.success("Finzy में आपका स्वागत है! 🎉 जल्द हम आपसे connect करेंगे।");
+        },
+        onError: () => {
+          toast.error("Something went wrong. Please try again.");
+        },
+      },
+    );
+  };
+
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      setSuccess(false);
+      setName("");
+      setEmail("");
+    }
+    onOpenChange(open);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent
+        className="sm:max-w-md border-0 shadow-2xl"
+        data-ocid="hero.dialog"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.16 0.07 255) 0%, oklch(0.20 0.09 248) 100%)",
+          color: "white",
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-display text-white">
+            {success ? "" : "Start Your ₹1 Trial"}
+          </DialogTitle>
+          <DialogDescription className="text-white/70">
+            {success
+              ? ""
+              : "Join thousands of students learning to invest smart."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {success ? (
+          <div className="py-6 text-center" data-ocid="hero.success_state">
+            {/* Big animated checkmark */}
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5 relative"
+              style={{
+                background: "oklch(0.67 0.18 160 / 0.15)",
+                border: "2px solid oklch(0.67 0.18 160 / 0.4)",
+              }}
+            >
+              <CheckCircle2
+                className="w-12 h-12"
+                style={{ color: "oklch(0.67 0.18 160)" }}
+              />
+              {/* Pulse ring */}
+              <div
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{
+                  background: "oklch(0.67 0.18 160 / 0.08)",
+                  animationDuration: "2s",
+                }}
+              />
+            </div>
+
+            {/* Hindi headline */}
+            <h3 className="text-2xl font-display font-bold text-white mb-2">
+              Registration हो गया! 🎉
+            </h3>
+            <p className="text-white/75 text-base leading-relaxed mb-5 px-2">
+              आपका Finzy ₹1 Trial शुरू हो गया है।
+              <br />
+              हम जल्द आपसे connect करेंगे।
+            </p>
+
+            {/* WhatsApp info box */}
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5 text-left"
+              style={{
+                background: "oklch(0.40 0.18 150 / 0.18)",
+                border: "1px solid oklch(0.67 0.18 160 / 0.35)",
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: "oklch(0.67 0.18 160 / 0.25)" }}
+              >
+                <MessageCircle
+                  className="w-5 h-5"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+              </div>
+              <div>
+                <p className="text-white/60 text-xs mb-0.5">
+                  कोई सवाल है? WhatsApp करें:
+                </p>
+                <a
+                  href="https://wa.me/917587170451"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-sm"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                >
+                  +91 75871 70451
+                </a>
+              </div>
+            </div>
+
+            <Button
+              className="w-full btn-finzy-green py-3 text-base font-semibold"
+              onClick={() => handleClose(false)}
+              data-ocid="hero.close_button"
+            >
+              Let's Start Learning! 🚀
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="signup-name"
+                className="text-white/80 text-sm font-medium"
+              >
+                Your Name
+              </Label>
+              <Input
+                id="signup-name"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                data-ocid="hero.input"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-[oklch(0.67_0.18_160)] focus:ring-[oklch(0.67_0.18_160)]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="signup-email"
+                className="text-white/80 text-sm font-medium"
+              >
+                Email Address
+              </Label>
+              <Input
+                id="signup-email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                data-ocid="hero.input"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full btn-finzy-green py-3 text-base"
+              disabled={isPending || !name.trim() || !email.trim()}
+              data-ocid="hero.submit_button"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Joining...
+                </>
+              ) : (
+                "Start ₹1 Trial →"
+              )}
+            </Button>
+            <p className="text-center text-white/50 text-xs">
+              No spam. Cancel anytime. First month: just ₹1.
+            </p>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Animated Hero SVG Chart ───────────────────────────────
+// Accurate 18% p.a. growth on ₹25,000 over 3 years:
+// Start: ₹25,000  (y=170)
+// Year 1: ₹29,500  (y=130)
+// Year 2: ₹34,810  (y=85)
+// Year 3: ₹41,076  (y=30)
+// SVG viewBox 0-200 height, top=low value, bottom=high value (inverted y)
+// Map: ₹25,000→170, ₹41,076→30 (range 140px for ₹16,076)
+// Scale: (value - 25000) / 16076 * 140, then 170 - scaled
+function HeroChart() {
+  // X positions: start=60, yr1=220, yr2=380, yr3=540
+  // Y positions (accurate):
+  const pts = [
+    { x: 60, y: 170, label: "Start", val: "₹25,000" },
+    { x: 220, y: 109, label: "Yr 1", val: "₹29,500" },
+    { x: 380, y: 61, label: "Yr 2", val: "₹34,810" },
+    { x: 540, y: 28, label: "Yr 3", val: "₹41,076" },
+  ];
+  const linePath = pts
+    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x} ${p.y}`)
+    .join(" ");
+  const areaPath = `${linePath} L540 200 L60 200 Z`;
+
+  return (
+    <svg
+      viewBox="0 0 600 210"
+      className="w-full opacity-45"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* Grid lines */}
+      {[40, 80, 120, 160].map((y) => (
+        <line
+          key={y}
+          x1="40"
+          y1={y}
+          x2="580"
+          y2={y}
+          stroke="white"
+          strokeWidth="0.5"
+          strokeOpacity="0.25"
+        />
+      ))}
+      {[60, 220, 380, 540].map((x) => (
+        <line
+          key={x}
+          x1={x}
+          y1="20"
+          x2={x}
+          y2="185"
+          stroke="white"
+          strokeWidth="0.5"
+          strokeOpacity="0.18"
+        />
+      ))}
+
+      {/* Area fill */}
+      <path d={areaPath} fill="url(#heroGradientFill)" opacity="0.22" />
+
+      {/* Main trend line */}
+      <path
+        d={linePath}
+        stroke="url(#heroGradientLine)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="animate-draw-line"
+      />
+
+      {/* Data points + labels */}
+      {pts.map((p, i) => (
+        <g key={p.label}>
+          <circle
+            cx={p.x}
+            cy={p.y}
+            r={i === pts.length - 1 ? 6 : 4}
+            fill={i === pts.length - 1 ? "oklch(0.67 0.18 160)" : "white"}
+            opacity={i === pts.length - 1 ? 1 : 0.75}
+          />
+          {/* Year label below x-axis */}
+          <text
+            x={p.x}
+            y={200}
+            textAnchor="middle"
+            fill="white"
+            fillOpacity="0.55"
+            fontSize="9"
+          >
+            {p.label}
+          </text>
+          {/* Value label above point */}
+          <text
+            x={p.x}
+            y={p.y - 9}
+            textAnchor="middle"
+            fill={i === pts.length - 1 ? "oklch(0.80 0.18 155)" : "white"}
+            fillOpacity={i === pts.length - 1 ? 1 : 0.75}
+            fontSize="9"
+            fontWeight={i === pts.length - 1 ? "bold" : "normal"}
+          >
+            {p.val}
+          </text>
+        </g>
+      ))}
+
+      <defs>
+        <linearGradient
+          id="heroGradientLine"
+          x1="60"
+          y1="0"
+          x2="540"
+          y2="0"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="white" stopOpacity="0.6" />
+          <stop offset="1" stopColor="oklch(0.67 0.18 160)" />
+        </linearGradient>
+        <linearGradient
+          id="heroGradientFill"
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="200"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="oklch(0.67 0.18 160)" stopOpacity="0.6" />
+          <stop offset="1" stopColor="oklch(0.67 0.18 160)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ── Navbar ────────────────────────────────────────────────
+function Navbar({ onTrialClick }: { onTrialClick: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Learn", href: "#learn" },
+    { label: "Pricing", href: "#pricing" },
+  ];
+
+  return (
+    <header
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      style={{
+        background: scrolled ? "oklch(0.18 0.08 255 / 0.95)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: scrolled ? "1px solid oklch(1 0 0 / 0.08)" : "none",
+      }}
+    >
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <a
+          href="#home"
+          className="flex items-center gap-2 shrink-0"
+          data-ocid="nav.link"
+        >
+          <FinzyLogo size="md" />
+        </a>
+
+        {/* Desktop Nav */}
+        <ul className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                className="text-sm font-medium text-white/75 hover:text-white transition-colors"
+                data-ocid="nav.link"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <div className="hidden md:block">
+          <button
+            type="button"
+            onClick={onTrialClick}
+            className="btn-finzy-green px-5 py-2 rounded-lg text-sm"
+            data-ocid="nav.primary_button"
+          >
+            Start ₹1 Trial
+          </button>
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          className="md:hidden text-white p-2"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
+        </button>
+      </nav>
+
+      {/* Mobile Nav */}
+      {mobileOpen && (
+        <div
+          className="md:hidden"
+          style={{
+            background: "oklch(0.18 0.08 255 / 0.98)",
+            borderTop: "1px solid oklch(1 0 0 / 0.08)",
+          }}
+        >
+          <div className="px-4 py-4 flex flex-col gap-4">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-white/80 hover:text-white font-medium transition-colors"
+                onClick={() => setMobileOpen(false)}
+                data-ocid="nav.link"
+              >
+                {link.label}
+              </a>
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                onTrialClick();
+              }}
+              className="btn-finzy-green px-5 py-3 rounded-lg text-sm text-left"
+              data-ocid="nav.primary_button"
+            >
+              Start ₹1 Trial
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+// ── Hero Section ──────────────────────────────────────────
+function HeroSection({ onTrialClick }: { onTrialClick: () => void }) {
+  return (
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center hero-gradient grid-bg overflow-hidden pt-16"
+      style={{
+        background:
+          "linear-gradient(135deg, oklch(0.18 0.08 255) 0%, oklch(0.22 0.10 245) 40%, oklch(0.30 0.12 200) 70%, oklch(0.38 0.14 165) 100%)",
+      }}
+    >
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Floating icons */}
+        <div
+          className="absolute top-24 right-12 text-4xl animate-float opacity-30 hidden lg:block"
+          aria-hidden="true"
+        >
+          ₹
+        </div>
+        <div
+          className="absolute top-40 right-32 text-2xl animate-float-delay-1 opacity-20 hidden lg:block"
+          aria-hidden="true"
+        >
+          📈
+        </div>
+        <div
+          className="absolute bottom-40 left-16 text-3xl animate-float-delay-2 opacity-25 hidden lg:block"
+          aria-hidden="true"
+        >
+          💰
+        </div>
+        <div
+          className="absolute top-1/2 left-8 text-xl animate-float opacity-15 hidden lg:block"
+          aria-hidden="true"
+        >
+          📊
+        </div>
+
+        {/* Glow orbs */}
+        <div
+          className="absolute top-20 right-0 w-96 h-96 rounded-full opacity-10 blur-3xl"
+          style={{ background: "oklch(0.67 0.18 160)" }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10 blur-3xl"
+          style={{ background: "oklch(0.45 0.12 255)" }}
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left — text */}
+          <div className="space-y-8">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={{
+                background: "oklch(0.67 0.18 160 / 0.15)",
+                color: "oklch(0.80 0.18 155)",
+                border: "1px solid oklch(0.67 0.18 160 / 0.3)",
+              }}
+            >
+              <Sparkles className="w-3 h-3" />
+              Financial Education for Students
+            </div>
+
+            <h1
+              className="text-5xl sm:text-6xl lg:text-7xl font-display leading-tight animate-fade-in-up"
+              style={{ color: "white" }}
+            >
+              Learn Money.
+              <br />
+              <span style={{ color: "oklch(0.80 0.18 155)" }}>
+                Start Investing.
+              </span>
+            </h1>
+
+            <p
+              className="text-lg sm:text-xl leading-relaxed max-w-xl animate-fade-in-up"
+              style={{ color: "oklch(1 0 0 / 0.7)", animationDelay: "0.15s" }}
+            >
+              A simple financial education platform designed for students who
+              want to understand saving, ETFs and long-term investing.
+            </p>
+
+            <div
+              className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <button
+                type="button"
+                onClick={onTrialClick}
+                className="btn-finzy-green px-8 py-4 rounded-xl text-base font-semibold flex items-center justify-center gap-2"
+                data-ocid="hero.primary_button"
+              >
+                <IndianRupee className="w-4 h-4" />
+                Start ₹1 Trial
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <a
+                href="#about"
+                className="btn-finzy-navy px-8 py-4 rounded-xl text-base font-semibold flex items-center justify-center gap-2"
+                data-ocid="hero.secondary_button"
+              >
+                Learn More
+              </a>
+            </div>
+
+            <div
+              className="flex items-center gap-6 animate-fade-in-up text-sm"
+              style={{ color: "oklch(1 0 0 / 0.55)", animationDelay: "0.45s" }}
+            >
+              <span className="flex items-center gap-1.5">
+                <Check
+                  className="w-4 h-4"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+                First month just ₹1
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check
+                  className="w-4 h-4"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+                No investment advice
+              </span>
+            </div>
+          </div>
+
+          {/* Right — chart */}
+          <div
+            className="relative hidden lg:block animate-fade-in"
+            style={{ animationDelay: "0.5s" }}
+          >
+            <div
+              className="rounded-2xl p-6"
+              style={{
+                background: "oklch(1 0 0 / 0.05)",
+                border: "1px solid oklch(1 0 0 / 0.12)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-white/60 text-xs uppercase tracking-wider">
+                    Portfolio Growth (18% p.a.)
+                  </p>
+                  <p className="text-white text-2xl font-display font-bold mt-0.5">
+                    ₹41,076
+                  </p>
+                </div>
+                <div
+                  className="px-3 py-1 rounded-full text-xs font-bold"
+                  style={{
+                    background: "oklch(0.67 0.18 160 / 0.2)",
+                    color: "oklch(0.80 0.18 155)",
+                  }}
+                >
+                  +64.3%
+                </div>
+              </div>
+              <HeroChart />
+              <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-white/50 text-xs">Invested</p>
+                  <p className="text-white font-semibold text-sm">₹25,000</p>
+                </div>
+                <div>
+                  <p className="text-white/50 text-xs">Returns</p>
+                  <p
+                    className="font-semibold text-sm"
+                    style={{ color: "oklch(0.80 0.18 155)" }}
+                  >
+                    +₹16,076
+                  </p>
+                </div>
+                <div>
+                  <p className="text-white/50 text-xs">Duration</p>
+                  <p className="text-white font-semibold text-sm">3 Years</p>
+                </div>
+              </div>
+
+              {/* Strategies strip */}
+              <div
+                className="mt-4 pt-4 flex flex-wrap gap-2"
+                style={{ borderTop: "1px solid oklch(1 0 0 / 0.1)" }}
+              >
+                <p className="text-white/50 text-xs w-full mb-1">
+                  Strategies Used:
+                </p>
+                {[
+                  "ETF Index Fund",
+                  "SIP Investing",
+                  "Buy & Hold",
+                  "Diversification",
+                ].map((s) => (
+                  <span
+                    key={s}
+                    className="text-xs px-2 py-0.5 rounded-full"
+                    style={{
+                      background: "oklch(0.67 0.18 160 / 0.15)",
+                      color: "oklch(0.80 0.18 155)",
+                      border: "1px solid oklch(0.67 0.18 160 / 0.25)",
+                    }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Mini cards */}
+            <div
+              className="absolute -bottom-6 -left-6 rounded-xl p-3 flex items-center gap-3"
+              style={{
+                background: "oklch(0.22 0.10 248 / 0.9)",
+                border: "1px solid oklch(1 0 0 / 0.1)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ background: "oklch(0.67 0.18 160 / 0.2)" }}
+              >
+                <TrendingUp
+                  className="w-4 h-4"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+              </div>
+              <div>
+                <p className="text-white text-xs font-semibold">
+                  ETF + SIP Strategy
+                </p>
+                <p
+                  className="text-xs"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                >
+                  18% p.a. growth
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom curve */}
+      <div className="absolute bottom-0 left-0 right-0">
+        <svg
+          viewBox="0 0 1440 60"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M0 60 L1440 60 L1440 30 Q720 0 0 30 Z"
+            fill="oklch(0.98 0.004 240)"
+          />
+        </svg>
+      </div>
+    </section>
+  );
+}
+
+// ── What is Finzy ─────────────────────────────────────────
+function AboutSection() {
+  const { data: signupCount } = useGetSignupCount();
+  const count = signupCount ? Number(signupCount) : 0;
+
+  return (
+    <section id="about" className="py-24 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="reveal">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+              style={{
+                background: "oklch(0.27 0.09 255 / 0.08)",
+                color: "oklch(0.27 0.09 255)",
+                border: "1px solid oklch(0.27 0.09 255 / 0.15)",
+              }}
+            >
+              <GraduationCap className="w-3 h-3" />
+              What is Finzy?
+            </div>
+
+            <h2
+              className="text-4xl sm:text-5xl font-display mb-8 leading-tight"
+              style={{ color: "oklch(0.16 0.07 255)" }}
+            >
+              Finance education that actually{" "}
+              <span style={{ color: "oklch(0.50 0.16 160)" }}>makes sense</span>
+            </h2>
+
+            <p
+              className="text-lg sm:text-xl leading-relaxed mb-10"
+              style={{ color: "oklch(0.45 0.04 255)" }}
+            >
+              Finzy is a student-focused financial education platform where
+              college students learn how money works, how to save money and how
+              to understand investing basics in a simple way.
+            </p>
+          </div>
+
+          {/* Social proof counter */}
+          <div className="reveal reveal-delay-2">
+            <div
+              className="inline-flex items-center gap-4 px-8 py-5 rounded-2xl"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.22 0.085 255 / 0.06) 0%, oklch(0.67 0.18 160 / 0.06) 100%)",
+                border: "1px solid oklch(0.22 0.085 255 / 0.12)",
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: "oklch(0.67 0.18 160 / 0.12)" }}
+              >
+                <Users
+                  className="w-6 h-6"
+                  style={{ color: "oklch(0.50 0.16 160)" }}
+                />
+              </div>
+              <div className="text-left">
+                <p
+                  className="text-3xl font-display font-bold"
+                  style={{ color: "oklch(0.22 0.085 255)" }}
+                >
+                  {count > 0 ? `${count.toLocaleString("en-IN")}+` : "20+"}
+                </p>
+                <p
+                  className="text-sm"
+                  style={{ color: "oklch(0.50 0.04 255)" }}
+                >
+                  students already joined
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3 pillars */}
+          <div className="grid sm:grid-cols-3 gap-6 mt-16">
+            {[
+              {
+                icon: BookOpen,
+                title: "Learn at your pace",
+                description:
+                  "Structured modules that fit your college schedule, no finance background needed.",
+                delay: "reveal-delay-1",
+              },
+              {
+                icon: Target,
+                title: "Built for students",
+                description:
+                  "Content designed specifically for 18–25 year olds with small savings.",
+                delay: "reveal-delay-2",
+              },
+              {
+                icon: Zap,
+                title: "Start with ₹1",
+                description:
+                  "Zero barrier to entry. Trial for ₹1, then just ₹99/month after.",
+                delay: "reveal-delay-3",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className={`reveal ${item.delay} p-6 rounded-2xl text-left feature-card`}
+                style={{
+                  background: "oklch(0.98 0.004 240)",
+                  border: "1px solid oklch(0.88 0.015 240)",
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: "oklch(0.27 0.09 255 / 0.1)" }}
+                >
+                  <item.icon
+                    className="w-5 h-5"
+                    style={{ color: "oklch(0.27 0.09 255)" }}
+                  />
+                </div>
+                <h3
+                  className="font-display font-bold text-lg mb-2"
+                  style={{ color: "oklch(0.16 0.07 255)" }}
+                >
+                  {item.title}
+                </h3>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "oklch(0.50 0.04 255)" }}
+                >
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── What You Will Learn ───────────────────────────────────
+const learnCards = [
+  {
+    icon: TrendingUp,
+    title: "ETF Investing Basics",
+    description:
+      "Learn what ETFs are and why they are beginner-friendly. Understand index funds, expense ratios, and why ETFs outperform most active funds.",
+    tag: "Most Popular",
+    tagColor: "oklch(0.67 0.18 160 / 0.12)",
+    tagText: "oklch(0.50 0.16 160)",
+  },
+  {
+    icon: Wallet,
+    title: "Saving Strategies for Students",
+    description:
+      "Understand how students can save money from small income. From the 50/30/20 rule to student-specific saving hacks.",
+    tag: "Beginner Friendly",
+    tagColor: "oklch(0.27 0.09 255 / 0.08)",
+    tagText: "oklch(0.27 0.09 255)",
+  },
+  {
+    icon: Clock,
+    title: "Long-Term Investing Mindset",
+    description:
+      "Learn the power of patience and compounding. See how ₹500/month invested at 20 years old becomes ₹1 crore+ by retirement.",
+    tag: "Must Know",
+    tagColor: "oklch(0.646 0.222 41.116 / 0.1)",
+    tagText: "oklch(0.50 0.17 41)",
+  },
+  {
+    icon: BarChart2,
+    title: "Simple Portfolio Concepts",
+    description:
+      "Understand diversification and basic portfolio thinking. Learn why not putting all your eggs in one basket actually matters.",
+    tag: "Practical",
+    tagColor: "oklch(0.67 0.18 160 / 0.12)",
+    tagText: "oklch(0.50 0.16 160)",
+  },
+];
+
+function LearnSection() {
+  return (
+    <section
+      id="learn"
+      className="py-24"
+      style={{ background: "oklch(0.97 0.006 240)" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.67 0.18 160 / 0.1)",
+              color: "oklch(0.50 0.16 160)",
+              border: "1px solid oklch(0.67 0.18 160 / 0.2)",
+            }}
+          >
+            <BookOpen className="w-3 h-3" />
+            What You Will Learn
+          </div>
+          <h2
+            className="text-4xl sm:text-5xl font-display mb-4"
+            style={{ color: "oklch(0.16 0.07 255)" }}
+          >
+            Everything a student investor{" "}
+            <span style={{ color: "oklch(0.50 0.16 160)" }}>needs</span>
+          </h2>
+          <p
+            className="text-lg max-w-2xl mx-auto"
+            style={{ color: "oklch(0.50 0.04 255)" }}
+          >
+            Curated modules built specifically for students with limited capital
+            and time.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {learnCards.map((card, i) => (
+            <div
+              key={card.title}
+              className={`reveal reveal-delay-${i + 1} feature-card bg-card rounded-2xl p-6 flex flex-col gap-4`}
+              style={{ border: "1px solid oklch(0.88 0.015 240)" }}
+            >
+              <div className="flex items-start justify-between">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: "oklch(0.27 0.09 255 / 0.08)" }}
+                >
+                  <card.icon
+                    className="w-6 h-6"
+                    style={{ color: "oklch(0.27 0.09 255)" }}
+                  />
+                </div>
+                <span
+                  className="text-xs font-semibold px-2 py-1 rounded-full"
+                  style={{ background: card.tagColor, color: card.tagText }}
+                >
+                  {card.tag}
+                </span>
+              </div>
+
+              <div>
+                <h3
+                  className="font-display font-bold text-lg mb-2 leading-tight"
+                  style={{ color: "oklch(0.16 0.07 255)" }}
+                >
+                  {card.title}
+                </h3>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "oklch(0.50 0.04 255)" }}
+                >
+                  {card.description}
+                </p>
+              </div>
+
+              {/* Mini sparkline */}
+              <div
+                className="mt-auto pt-4"
+                style={{ borderTop: "1px solid oklch(0.88 0.015 240)" }}
+              >
+                <svg
+                  viewBox="0 0 80 30"
+                  fill="none"
+                  className="w-full h-8 opacity-60"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M0 25 L15 20 L30 18 L45 12 L60 7 L75 3"
+                    stroke="oklch(0.50 0.16 160)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="75" cy="3" r="3" fill="oklch(0.67 0.18 160)" />
+                </svg>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── How Finzy Works ───────────────────────────────────────
+const steps = [
+  {
+    number: "01",
+    label: "Learn",
+    icon: BookOpen,
+    description:
+      "Access beginner-friendly modules on saving, ETFs, and investing fundamentals.",
+  },
+  {
+    number: "02",
+    label: "Understand",
+    icon: GraduationCap,
+    description:
+      "Grasp core concepts with visual charts, plain language explanations, and examples.",
+  },
+  {
+    number: "03",
+    label: "Start Small",
+    icon: IndianRupee,
+    description:
+      "Apply your knowledge with real-world scenarios using amounts as small as ₹500.",
+  },
+  {
+    number: "04",
+    label: "Grow",
+    icon: TrendingUp,
+    description:
+      "Build long-term wealth through consistent, disciplined investing over time.",
+  },
+];
+
+function HowItWorksSection() {
+  return (
+    <section className="py-24 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.27 0.09 255 / 0.08)",
+              color: "oklch(0.27 0.09 255)",
+              border: "1px solid oklch(0.27 0.09 255 / 0.15)",
+            }}
+          >
+            How It Works
+          </div>
+          <h2
+            className="text-4xl sm:text-5xl font-display mb-4"
+            style={{ color: "oklch(0.16 0.07 255)" }}
+          >
+            Your journey to financial{" "}
+            <span style={{ color: "oklch(0.27 0.09 255)" }}>clarity</span>
+          </h2>
+        </div>
+
+        {/* Steps */}
+        <div className="relative">
+          {/* Connector line */}
+          <div
+            className="absolute top-8 left-0 right-0 h-0.5 hidden lg:block mx-24"
+            style={{
+              background:
+                "linear-gradient(90deg, oklch(0.27 0.09 255) 0%, oklch(0.67 0.18 160) 100%)",
+              opacity: 0.3,
+            }}
+          />
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, i) => (
+              <div
+                key={step.label}
+                className={`reveal reveal-delay-${i + 1} relative flex flex-col items-center text-center`}
+              >
+                {/* Step circle */}
+                <div
+                  className="relative w-16 h-16 rounded-full flex items-center justify-center mb-6 z-10"
+                  style={{
+                    background: `linear-gradient(135deg, oklch(0.22 0.085 255) 0%, oklch(${0.3 + i * 0.08} 0.13 ${255 - i * 20}) 100%)`,
+                    boxShadow: "0 8px 24px -4px oklch(0.27 0.09 255 / 0.3)",
+                  }}
+                >
+                  <step.icon className="w-7 h-7 text-white" />
+                  <span
+                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center"
+                    style={{
+                      background: "oklch(0.67 0.18 160)",
+                      color: "white",
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                </div>
+
+                <h3
+                  className="text-xl font-display font-bold mb-2"
+                  style={{ color: "oklch(0.16 0.07 255)" }}
+                >
+                  {step.label}
+                </h3>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "oklch(0.50 0.04 255)" }}
+                >
+                  {step.description}
+                </p>
+
+                {/* Arrow for desktop */}
+                {i < steps.length - 1 && (
+                  <ChevronRight
+                    className="absolute top-8 -right-4 hidden lg:block w-5 h-5 -translate-y-1/2"
+                    style={{ color: "oklch(0.67 0.18 160)", opacity: 0.5 }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Why Start Early ───────────────────────────────────────
+function WhyEarlySection() {
+  const compoundRef = useRef<SVGPathElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && compoundRef.current) {
+            compoundRef.current.classList.add("animate-draw-line");
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+    const el = compoundRef.current;
+    if (el) observer.observe(el.closest("section") || el);
+    return () => observer.disconnect();
+  }, []);
+
+  const benefits = [
+    {
+      icon: Clock,
+      title: "Time is your biggest asset",
+      description:
+        "Time helps investments grow through compounding. Starting at 20 vs 30 can double your final corpus.",
+      stat: "2×",
+      statLabel: "more wealth at 30 yrs",
+    },
+    {
+      icon: TrendingUp,
+      title: "Small amounts, big results",
+      description:
+        "Small amounts invested early can grow over time. ₹500/month for 30 years at 12% = ₹1.76 Cr.",
+      stat: "₹1.76 Cr",
+      statLabel: "from ₹500/mo",
+    },
+    {
+      icon: IndianRupee,
+      title: "Build financial discipline",
+      description:
+        "Financial knowledge builds discipline. Understanding money transforms how you earn, save and spend.",
+      stat: "3×",
+      statLabel: "saving improvement",
+    },
+  ];
+
+  return (
+    <section
+      className="py-24 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, oklch(0.16 0.07 255) 0%, oklch(0.22 0.10 245) 60%, oklch(0.28 0.12 210) 100%)",
+      }}
+    >
+      {/* Background grid */}
+      <div className="absolute inset-0 grid-bg opacity-30" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.67 0.18 160 / 0.15)",
+              color: "oklch(0.80 0.18 155)",
+              border: "1px solid oklch(0.67 0.18 160 / 0.3)",
+            }}
+          >
+            <Sparkles className="w-3 h-3" />
+            Why Start Early
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-display text-white mb-4">
+            The earlier you start,
+            <br />
+            <span style={{ color: "oklch(0.80 0.18 155)" }}>
+              the richer you grow
+            </span>
+          </h2>
+          <p
+            className="text-lg max-w-2xl mx-auto"
+            style={{ color: "oklch(1 0 0 / 0.65)" }}
+          >
+            Compounding is the eighth wonder of the world. Start at 20 and let
+            time do the heavy lifting.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+          {benefits.map((b, i) => (
+            <div
+              key={b.title}
+              className={`reveal reveal-delay-${i + 1} rounded-2xl p-8`}
+              style={{
+                background: "oklch(1 0 0 / 0.06)",
+                border: "1px solid oklch(1 0 0 / 0.1)",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
+                style={{ background: "oklch(0.67 0.18 160 / 0.2)" }}
+              >
+                <b.icon
+                  className="w-6 h-6"
+                  style={{ color: "oklch(0.80 0.18 155)" }}
+                />
+              </div>
+
+              <div
+                className="text-4xl font-display font-black mb-1"
+                style={{ color: "oklch(0.80 0.18 155)" }}
+              >
+                {b.stat}
+              </div>
+              <div className="text-white/60 text-xs mb-4">{b.statLabel}</div>
+
+              <h3 className="text-xl font-display font-bold text-white mb-3">
+                {b.title}
+              </h3>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "oklch(1 0 0 / 0.65)" }}
+              >
+                {b.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Compound chart */}
+        <div
+          className="reveal rounded-2xl p-6 sm:p-8"
+          style={{
+            background: "oklch(1 0 0 / 0.05)",
+            border: "1px solid oklch(1 0 0 / 0.1)",
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-xl font-display font-bold text-white">
+                Compounding in Action
+              </h3>
+              <p className="text-white/60 text-sm mt-1">
+                ₹25,000 invested at 18% p.a. — grows to ₹41,076 in 3 years
+              </p>
+            </div>
+            <div className="flex gap-6">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ background: "oklch(0.80 0.18 155)" }}
+                />
+                <span className="text-white/70 text-sm">Starting at 20</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-white/40" />
+                <span className="text-white/70 text-sm">Starting at 30</span>
+              </div>
+            </div>
+          </div>
+          <svg
+            viewBox="0 0 700 180"
+            fill="none"
+            className="w-full"
+            aria-hidden="true"
+          >
+            {/* Grid */}
+            {[40, 80, 120, 160].map((y) => (
+              <line
+                key={y}
+                x1="0"
+                y1={y}
+                x2="700"
+                y2={y}
+                stroke="white"
+                strokeWidth="0.5"
+                strokeOpacity="0.1"
+              />
+            ))}
+            {[0, 100, 200, 300, 400, 500, 600, 700].map((x) => (
+              <line
+                key={x}
+                x1={x}
+                y1="0"
+                x2={x}
+                y2="180"
+                stroke="white"
+                strokeWidth="0.5"
+                strokeOpacity="0.1"
+              />
+            ))}
+
+            {/* Starting at 30 (shorter, lower) */}
+            <path
+              d="M0 170 L100 168 L200 165 L300 158 L400 145 L500 125 L600 95 L700 55"
+              stroke="white"
+              strokeWidth="2"
+              strokeOpacity="0.4"
+              strokeLinecap="round"
+              fill="none"
+            />
+
+            {/* Starting at 20 (longer, higher) */}
+            <path
+              d="M0 170 L100 165 L200 155 L300 135 L400 105 L500 68 L600 30 L700 5"
+              stroke="oklch(0.80 0.18 155)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              ref={compoundRef}
+              style={{ strokeDasharray: 1000, strokeDashoffset: 1000 }}
+              fill="none"
+            />
+
+            {/* Labels */}
+            <text x="10" y="174" fill="white" fillOpacity="0.5" fontSize="10">
+              5yr
+            </text>
+            <text x="150" y="174" fill="white" fillOpacity="0.5" fontSize="10">
+              15yr
+            </text>
+            <text x="300" y="174" fill="white" fillOpacity="0.5" fontSize="10">
+              25yr
+            </text>
+            <text x="450" y="174" fill="white" fillOpacity="0.5" fontSize="10">
+              35yr
+            </text>
+            <text x="620" y="174" fill="white" fillOpacity="0.5" fontSize="10">
+              40yr
+            </text>
+          </svg>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Pricing Section ───────────────────────────────────────
+function PricingSection({ onTrialClick }: { onTrialClick: () => void }) {
+  const features = [
+    "ETF investing education",
+    "Student saving strategies",
+    "Simple investing knowledge",
+    "Community learning support",
+    "Beginner-friendly financial education",
+    "Simple market understanding",
+    "Community learning environment",
+  ];
+
+  return (
+    <section id="pricing" className="py-24 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.67 0.18 160 / 0.1)",
+              color: "oklch(0.50 0.16 160)",
+              border: "1px solid oklch(0.67 0.18 160 / 0.2)",
+            }}
+          >
+            <IndianRupee className="w-3 h-3" />
+            Start Learning with Finzy
+          </div>
+          <h2
+            className="text-4xl sm:text-5xl font-display mb-4"
+            style={{ color: "oklch(0.16 0.07 255)" }}
+          >
+            Student-priced,{" "}
+            <span style={{ color: "oklch(0.50 0.16 160)" }}>world-class</span>{" "}
+            learning
+          </h2>
+          <p className="text-lg" style={{ color: "oklch(0.50 0.04 255)" }}>
+            No expensive courses. No hidden fees. Just honest pricing for
+            students.
+          </p>
+        </div>
+
+        <div className="max-w-xl mx-auto reveal" data-ocid="pricing.card">
+          {/* Main pricing card */}
+          <div
+            className="pricing-glow rounded-3xl overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(160deg, oklch(0.22 0.085 255) 0%, oklch(0.18 0.08 255) 100%)",
+            }}
+          >
+            {/* Top badge */}
+            <div
+              className="text-center py-3 text-sm font-semibold"
+              style={{ background: "oklch(0.67 0.18 160)", color: "white" }}
+            >
+              🎓 Finzy Student Plan — Most Popular
+            </div>
+
+            <div className="p-8 sm:p-10">
+              {/* Price */}
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div
+                    className="px-4 py-2 rounded-full text-sm font-bold"
+                    style={{
+                      background: "oklch(0.67 0.18 160 / 0.2)",
+                      color: "oklch(0.80 0.18 155)",
+                    }}
+                  >
+                    ₹1 for first month
+                  </div>
+                </div>
+
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-2xl font-display text-white/60">₹</span>
+                  <span className="text-7xl font-display font-black text-white">
+                    99
+                  </span>
+                  <span className="text-xl text-white/60">/month</span>
+                </div>
+                <p className="text-white/50 text-sm mt-2">
+                  after your ₹1 trial month
+                </p>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: "oklch(0.67 0.18 160 / 0.2)" }}
+                    >
+                      <Check
+                        className="w-3 h-3"
+                        style={{ color: "oklch(0.80 0.18 155)" }}
+                      />
+                    </div>
+                    <span className="text-sm text-white/80">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <button
+                type="button"
+                onClick={onTrialClick}
+                className="w-full btn-finzy-green py-4 rounded-xl text-lg font-bold"
+                data-ocid="pricing.primary_button"
+              >
+                Start ₹1 Trial →
+              </button>
+
+              <p className="text-center text-white/40 text-xs mt-4">
+                No credit card required for trial. Cancel anytime.
+              </p>
+            </div>
+          </div>
+
+          {/* Trust line */}
+          <p
+            className="text-center mt-6 text-sm"
+            style={{ color: "oklch(0.50 0.04 255)" }}
+          >
+            ✨ Built for students who want to learn investing early.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Benefits Section ──────────────────────────────────────
+const benefitItems = [
+  {
+    icon: GraduationCap,
+    title: "Beginner-friendly education",
+    description:
+      "No jargon. No assumptions. Everything explained from first principles so anyone can understand.",
+  },
+  {
+    icon: TrendingUp,
+    title: "ETF learning resources",
+    description:
+      "Dedicated content on index funds, ETFs, and passive investing — the proven path for most investors.",
+  },
+  {
+    icon: BarChart2,
+    title: "Simple market understanding",
+    description:
+      "Learn how markets work, why they go up and down, and how to stay calm during volatility.",
+  },
+  {
+    icon: Users,
+    title: "Student learning community",
+    description:
+      "Join a community of students learning together. Share experiences, ask questions, grow together.",
+  },
+];
+
+function BenefitsSection() {
+  return (
+    <section className="py-24" style={{ background: "oklch(0.97 0.006 240)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.27 0.09 255 / 0.08)",
+              color: "oklch(0.27 0.09 255)",
+              border: "1px solid oklch(0.27 0.09 255 / 0.15)",
+            }}
+          >
+            What Students Get
+          </div>
+          <h2
+            className="text-4xl sm:text-5xl font-display mb-4"
+            style={{ color: "oklch(0.16 0.07 255)" }}
+          >
+            Everything you need to{" "}
+            <span style={{ color: "oklch(0.27 0.09 255)" }}>start smart</span>
+          </h2>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {benefitItems.map((item, i) => (
+            <div
+              key={item.title}
+              className={`reveal reveal-delay-${i + 1} feature-card bg-card rounded-2xl p-6`}
+              style={{ border: "1px solid oklch(0.88 0.015 240)" }}
+              data-ocid={`benefits.item.${i + 1}`}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(0.22 0.085 255 / 0.1) 0%, oklch(0.67 0.18 160 / 0.1) 100%)",
+                }}
+              >
+                <item.icon
+                  className="w-6 h-6"
+                  style={{ color: "oklch(0.27 0.09 255)" }}
+                />
+              </div>
+              <h3
+                className="font-display font-bold text-lg mb-3"
+                style={{ color: "oklch(0.16 0.07 255)" }}
+              >
+                {item.title}
+              </h3>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "oklch(0.50 0.04 255)" }}
+              >
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Trust Section ─────────────────────────────────────────
+function TrustSection() {
+  const pillars = [
+    {
+      icon: GraduationCap,
+      title: "Student-focused financial learning",
+      description:
+        "Every piece of content is crafted with a college student in mind — limited income, limited time, big dreams.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Simple and transparent education",
+      description:
+        "We teach, we don't sell. No hidden agenda. No affiliate products pushed on you. Pure education.",
+    },
+    {
+      icon: Clock,
+      title: "Long-term investing mindset",
+      description:
+        "We teach patience, not speculation. Building wealth the slow-and-steady way that actually works.",
+    },
+  ];
+
+  return (
+    <section className="py-24 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg
+          viewBox="0 0 1440 400"
+          fill="none"
+          className="absolute bottom-0 left-0 right-0 w-full opacity-[0.03]"
+          aria-hidden="true"
+        >
+          <path
+            d="M0 300 L240 250 L480 200 L720 150 L960 100 L1200 60 L1440 30"
+            stroke="oklch(0.22 0.085 255)"
+            strokeWidth="3"
+          />
+          <path
+            d="M0 350 L240 310 L480 270 L720 220 L960 170 L1200 120 L1440 80"
+            stroke="oklch(0.67 0.18 160)"
+            strokeWidth="2"
+          />
+        </svg>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 reveal">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{
+              background: "oklch(0.27 0.09 255 / 0.08)",
+              color: "oklch(0.27 0.09 255)",
+              border: "1px solid oklch(0.27 0.09 255 / 0.15)",
+            }}
+          >
+            <ShieldCheck className="w-3 h-3" />
+            Why Trust Finzy
+          </div>
+          <h2
+            className="text-4xl sm:text-5xl font-display mb-4"
+            style={{ color: "oklch(0.16 0.07 255)" }}
+          >
+            Built on{" "}
+            <span style={{ color: "oklch(0.27 0.09 255)" }}>transparency</span>{" "}
+            and trust
+          </h2>
+          <p
+            className="text-lg max-w-2xl mx-auto"
+            style={{ color: "oklch(0.50 0.04 255)" }}
+          >
+            We are educators, not brokers. Our goal is your financial literacy,
+            not commission.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-8">
+          {pillars.map((p, i) => (
+            <div
+              key={p.title}
+              className={`reveal reveal-delay-${i + 1} text-center`}
+            >
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(0.22 0.085 255 / 0.08) 0%, oklch(0.67 0.18 160 / 0.08) 100%)",
+                  border: "1px solid oklch(0.27 0.09 255 / 0.1)",
+                }}
+              >
+                <p.icon
+                  className="w-8 h-8"
+                  style={{ color: "oklch(0.27 0.09 255)" }}
+                />
+              </div>
+              <h3
+                className="text-xl font-display font-bold mb-3"
+                style={{ color: "oklch(0.16 0.07 255)" }}
+              >
+                {p.title}
+              </h3>
+              <p
+                className="text-sm leading-relaxed max-w-xs mx-auto"
+                style={{ color: "oklch(0.50 0.04 255)" }}
+              >
+                {p.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats bar */}
+        <div
+          className="reveal mt-16 rounded-2xl p-8 grid grid-cols-2 sm:grid-cols-4 gap-8 text-center"
+          style={{
+            background:
+              "linear-gradient(135deg, oklch(0.22 0.085 255 / 0.04) 0%, oklch(0.67 0.18 160 / 0.04) 100%)",
+            border: "1px solid oklch(0.27 0.09 255 / 0.08)",
+          }}
+        >
+          {[
+            { value: "500+", label: "Students Learning" },
+            { value: "4", label: "Core Modules" },
+            { value: "₹1", label: "Trial Price" },
+            { value: "100%", label: "Education Only" },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div
+                className="text-4xl font-display font-black mb-1"
+                style={{ color: "oklch(0.27 0.09 255)" }}
+              >
+                {stat.value}
+              </div>
+              <div
+                className="text-sm"
+                style={{ color: "oklch(0.50 0.04 255)" }}
+              >
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Footer ────────────────────────────────────────────────
+function Footer() {
+  const year = new Date().getFullYear();
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+  const caffeineUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`;
+
+  return (
+    <footer
+      style={{
+        background:
+          "linear-gradient(160deg, oklch(0.13 0.06 255) 0%, oklch(0.18 0.08 255) 100%)",
+        borderTop: "1px solid oklch(1 0 0 / 0.08)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* Brand */}
+          <div className="lg:col-span-2">
+            <div className="mb-4">
+              <FinzyLogo size="md" />
+            </div>
+            <p
+              className="text-sm leading-relaxed max-w-sm"
+              style={{ color: "oklch(1 0 0 / 0.55)" }}
+            >
+              A financial education platform for Indian college students. Learn
+              saving, ETFs, and long-term investing in a simple, structured way.
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 className="font-display font-bold text-white mb-4 text-sm uppercase tracking-wider">
+              Platform
+            </h4>
+            <ul className="space-y-3">
+              {["Home", "About", "Learn", "Pricing"].map((item) => (
+                <li key={item}>
+                  <a
+                    href={`#${item.toLowerCase()}`}
+                    className="text-sm transition-colors"
+                    style={{ color: "oklch(1 0 0 / 0.55)" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "oklch(1 0 0 / 0.55)";
+                    }}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-display font-bold text-white mb-4 text-sm uppercase tracking-wider">
+              Contact
+            </h4>
+            <div className="space-y-2">
+              <a
+                href="mailto:info.lovekushh@gmail.com"
+                className="text-sm flex items-center gap-1.5 transition-colors"
+                style={{ color: "oklch(0.80 0.18 155)" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "oklch(0.80 0.18 155)";
+                }}
+                data-ocid="footer.link"
+              >
+                ✉ info.lovekushh@gmail.com
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div
+          className="rounded-xl p-5 mb-8"
+          style={{
+            background: "oklch(1 0 0 / 0.04)",
+            border: "1px solid oklch(1 0 0 / 0.08)",
+          }}
+        >
+          <p
+            className="text-xs leading-relaxed"
+            style={{ color: "oklch(1 0 0 / 0.45)" }}
+          >
+            <strong className="text-white/70">Disclaimer:</strong> Finzy
+            provides financial education only and does not provide investment
+            advice. The content on this platform is for educational purposes
+            only and should not be considered as financial, investment, legal or
+            tax advice. Please consult a certified financial advisor before
+            making any investment decisions.
+          </p>
+        </div>
+
+        {/* Copyright */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8"
+          style={{ borderTop: "1px solid oklch(1 0 0 / 0.08)" }}
+        >
+          <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.35)" }}>
+            © {year} Finzy by Love & Kush. All rights reserved.
+          </p>
+          <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.35)" }}>
+            Built with ❤️ using{" "}
+            <a
+              href={caffeineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-white/60 transition-colors"
+            >
+              caffeine.ai
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ── WhatsApp Floating Button ──────────────────────────────
+function WhatsAppFloatingButton() {
+  return (
+    <a
+      href="https://wa.me/917587170451"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-ocid="whatsapp.button"
+      aria-label="Chat on WhatsApp"
+      style={{
+        position: "fixed",
+        bottom: "28px",
+        right: "28px",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "60px",
+        height: "60px",
+        borderRadius: "50%",
+        backgroundColor: "#25D366",
+        boxShadow: "0 4px 20px rgba(37,211,102,0.45)",
+        transition: "transform 0.2s, box-shadow 0.2s",
+        textDecoration: "none",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.12)";
+        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+          "0 6px 28px rgba(37,211,102,0.6)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+          "0 4px 20px rgba(37,211,102,0.45)";
+      }}
+    >
+      {/* WhatsApp SVG Icon */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 32 32"
+        width="32"
+        height="32"
+        fill="white"
+        role="img"
+        aria-label="WhatsApp"
+      >
+        <title>WhatsApp</title>
+        <path d="M16.003 2C8.28 2 2 8.28 2 16.003c0 2.478.664 4.802 1.822 6.808L2 30l7.378-1.797A13.94 13.94 0 0 0 16.003 30C23.72 30 30 23.72 30 16.003 30 8.28 23.72 2 16.003 2zm0 25.471a11.43 11.43 0 0 1-5.832-1.594l-.418-.248-4.378 1.065 1.094-4.254-.273-.436A11.432 11.432 0 0 1 4.57 16.003c0-6.308 5.127-11.433 11.433-11.433 6.308 0 11.433 5.125 11.433 11.433 0 6.308-5.125 11.468-11.433 11.468zm6.274-8.567c-.344-.172-2.036-1.004-2.351-1.118-.316-.115-.546-.172-.776.172-.229.344-.889 1.118-1.09 1.348-.2.229-.4.258-.744.086-.344-.172-1.453-.536-2.767-1.707-1.022-.912-1.712-2.038-1.913-2.382-.2-.344-.021-.53.15-.701.155-.154.344-.4.516-.6.172-.2.229-.344.344-.572.115-.229.057-.43-.029-.601-.086-.172-.776-1.869-1.063-2.559-.28-.672-.563-.58-.776-.59l-.659-.011c-.229 0-.601.086-.916.43-.315.344-1.204 1.176-1.204 2.867 0 1.692 1.233 3.327 1.405 3.556.172.229 2.427 3.707 5.879 5.197.822.354 1.463.566 1.963.724.824.262 1.574.225 2.167.137.661-.099 2.036-.832 2.322-1.636.287-.804.287-1.493.2-1.637-.086-.143-.315-.229-.659-.401z" />
+      </svg>
+    </a>
+  );
+}
+
+// ── Homepage ──────────────────────────────────────────────
+function Homepage() {
+  const [signupOpen, setSignupOpen] = useState(false);
+
+  useRevealOnScroll();
+
+  return (
+    <>
+      <Toaster richColors />
+      <Navbar onTrialClick={() => setSignupOpen(true)} />
+      <main>
+        <HeroSection onTrialClick={() => setSignupOpen(true)} />
+        <AboutSection />
+        <LearnSection />
+        <HowItWorksSection />
+        <WhyEarlySection />
+        <PricingSection onTrialClick={() => setSignupOpen(true)} />
+        <BenefitsSection />
+        <TrustSection />
+      </main>
+      <Footer />
+      <SignupModal open={signupOpen} onOpenChange={setSignupOpen} />
+      <WhatsAppFloatingButton />
+    </>
+  );
+}
+
+// ── App Root ──────────────────────────────────────────────
+export default function App() {
+  const [route, setRoute] = useState(() => window.location.hash);
+
+  useEffect(() => {
+    // Sync on mount in case hash was set before React loaded
+    setRoute(window.location.hash);
+
+    const handler = () => setRoute(window.location.hash);
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
+  }, []);
+
+  if (route === "#/admin") {
+    return <AdminDashboard />;
+  }
+
+  return <Homepage />;
+}

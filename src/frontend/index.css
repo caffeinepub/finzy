@@ -1,0 +1,310 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Fonts ─────────────────────────────────────────────── */
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/assets/fonts/CabinetGrotesk-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sora";
+  src: url("/assets/fonts/Sora-Variable.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Design tokens ──────────────────────────────────────── */
+@layer base {
+  :root {
+    --radius: 0.75rem;
+
+    /* Navy blue primary */
+    --primary: 0.27 0.09 255;
+    --primary-foreground: 1 0 0;
+
+    /* Emerald green accent */
+    --accent: 0.67 0.18 160;
+    --accent-foreground: 1 0 0;
+
+    /* Backgrounds */
+    --background: 0.98 0.004 240;
+    --foreground: 0.15 0.04 255;
+
+    /* Card */
+    --card: 1 0 0;
+    --card-foreground: 0.18 0.04 255;
+
+    /* Popover */
+    --popover: 1 0 0;
+    --popover-foreground: 0.15 0.04 255;
+
+    /* Secondary */
+    --secondary: 0.94 0.01 240;
+    --secondary-foreground: 0.27 0.09 255;
+
+    /* Muted */
+    --muted: 0.94 0.01 240;
+    --muted-foreground: 0.50 0.04 255;
+
+    /* Destructive */
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 1 0 0;
+
+    /* Borders */
+    --border: 0.88 0.015 240;
+    --input: 0.88 0.015 240;
+    --ring: 0.55 0.09 255;
+
+    /* Chart */
+    --chart-1: 0.27 0.09 255;
+    --chart-2: 0.67 0.18 160;
+    --chart-3: 0.55 0.12 200;
+    --chart-4: 0.45 0.15 255;
+    --chart-5: 0.80 0.15 150;
+
+    /* Sidebar */
+    --sidebar: 0.97 0.006 240;
+    --sidebar-foreground: 0.15 0.04 255;
+    --sidebar-primary: 0.27 0.09 255;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.94 0.01 240;
+    --sidebar-accent-foreground: 0.27 0.09 255;
+    --sidebar-border: 0.88 0.015 240;
+    --sidebar-ring: 0.55 0.09 255;
+
+    /* Custom Finzy tokens */
+    --finzy-navy: 0.22 0.085 255;
+    --finzy-navy-deep: 0.16 0.07 255;
+    --finzy-green: 0.67 0.18 160;
+    --finzy-green-light: 0.90 0.08 155;
+    --finzy-green-dark: 0.50 0.16 160;
+    --finzy-hero-bg-start: 0.18 0.08 255;
+    --finzy-hero-bg-end: 0.35 0.13 160;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Sora", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Cabinet Grotesk", sans-serif;
+    font-weight: 700;
+  }
+}
+
+/* ── Custom animations ──────────────────────────────────── */
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 600;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(3deg); }
+  66% { transform: translateY(-5px) rotate(-3deg); }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px oklch(0.67 0.18 160 / 0.3); }
+  50% { box-shadow: 0 0 40px oklch(0.67 0.18 160 / 0.6), 0 0 60px oklch(0.67 0.18 160 / 0.2); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: draw-line 2.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float-icon 4s ease-in-out infinite;
+}
+
+.animate-float-delay-1 {
+  animation: float-icon 4s ease-in-out infinite 1s;
+}
+
+.animate-float-delay-2 {
+  animation: float-icon 4s ease-in-out infinite 2s;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Reduced motion: skip animations, show elements immediately */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-draw-line {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
+}
+
+/* Scroll reveal — elements start hidden */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* Feature card hover */
+.feature-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -10px oklch(0.22 0.085 255 / 0.15);
+}
+
+/* Finzy green button */
+.btn-finzy-green {
+  background-color: oklch(0.67 0.18 160);
+  color: white;
+  font-family: "Cabinet Grotesk", sans-serif;
+  font-weight: 700;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-finzy-green:hover {
+  background-color: oklch(0.60 0.18 160);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -4px oklch(0.67 0.18 160 / 0.4);
+}
+
+.btn-finzy-green:active {
+  transform: translateY(0);
+}
+
+/* Finzy navy button */
+.btn-finzy-navy {
+  border: 2px solid oklch(1 0 0 / 0.4);
+  color: white;
+  font-family: "Cabinet Grotesk", sans-serif;
+  font-weight: 600;
+  background: transparent;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.btn-finzy-navy:hover {
+  border-color: oklch(1 0 0 / 0.7);
+  background: oklch(1 0 0 / 0.1);
+  transform: translateY(-1px);
+}
+
+/* Pricing glow */
+.pricing-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+  border: 2px solid oklch(0.67 0.18 160);
+}
+
+/* Hero gradient */
+.hero-gradient {
+  background: linear-gradient(135deg,
+    oklch(0.18 0.08 255) 0%,
+    oklch(0.22 0.10 245) 40%,
+    oklch(0.30 0.12 200) 70%,
+    oklch(0.38 0.14 165) 100%
+  ) !important;
+}
+
+/* Grid background pattern — uses pseudo-element so it doesn't override background color */
+.grid-bg {
+  position: relative;
+}
+
+.grid-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Section backgrounds */
+.section-alt {
+  background-color: oklch(0.97 0.006 240);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
