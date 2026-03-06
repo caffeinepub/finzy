@@ -1044,7 +1044,7 @@ function AboutSection() {
                   className="text-3xl font-display font-bold"
                   style={{ color: "oklch(0.22 0.085 255)" }}
                 >
-                  {count > 0 ? `${count.toLocaleString("en-IN")}+` : "20+"}
+                  {count > 0 ? `${count.toLocaleString("en-IN")}+` : "150+"}
                 </p>
                 <p
                   className="text-sm"
