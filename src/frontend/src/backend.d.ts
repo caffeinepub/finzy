@@ -11,10 +11,12 @@ export interface Signup {
     name: string;
     email: string;
     timestamp: Time;
+    phone: string;
 }
 export type Time = bigint;
 export interface backendInterface {
     addSignup(name: string, email: string): Promise<void>;
+    addSignupWithPhone(name: string, email: string, phone: string): Promise<void>;
     getSignupCount(): Promise<bigint>;
     getSignups(): Promise<Array<Signup>>;
 }

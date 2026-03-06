@@ -106,10 +106,8 @@ function SignupModal({ open, onOpenChange }: SignupModalProps) {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !phone.trim()) return;
     const fullPhone = `${countryCode}${phone.trim()}`;
-    // Store name with phone appended so admin can see it
-    const nameWithPhone = `${name.trim()} [${fullPhone}]`;
     mutate(
-      { name: nameWithPhone, email: email.trim() },
+      { name: name.trim(), email: email.trim(), phone: fullPhone },
       {
         onSuccess: () => {
           setSuccess(true);
@@ -1044,7 +1042,7 @@ function AboutSection() {
                   className="text-3xl font-display font-bold"
                   style={{ color: "oklch(0.22 0.085 255)" }}
                 >
-                  {count > 0 ? `${count.toLocaleString("en-IN")}+` : "150+"}
+                  {count > 150 ? `${count.toLocaleString("en-IN")}+` : "150+"}
                 </p>
                 <p
                   className="text-sm"

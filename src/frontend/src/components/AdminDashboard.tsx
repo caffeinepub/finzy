@@ -14,6 +14,7 @@ import {
   LogOut,
   Mail,
   MessageCircle,
+  Phone,
   RefreshCw,
   ShieldCheck,
   TrendingUp,
@@ -394,6 +395,7 @@ function NewSignupsBanner({
 type SignupRecord = {
   name: string;
   email: string;
+  phone?: string;
   timestamp: bigint;
 };
 
@@ -414,10 +416,11 @@ function formatTimestamp(ts: bigint): string {
 }
 
 function exportToCSV(signups: SignupRecord[]) {
-  const header = ["#", "Name", "Email", "Timestamp"];
+  const header = ["#", "Name", "Phone", "Email", "Timestamp"];
   const rows = signups.map((s, i) => [
     String(i + 1),
     `"${s.name.replace(/"/g, '""')}"`,
+    `"${(s.phone ?? "").replace(/"/g, '""')}"`,
     `"${s.email.replace(/"/g, '""')}"`,
     `"${formatTimestamp(s.timestamp)}"`,
   ]);
@@ -445,7 +448,8 @@ function SignupListSection({
   const filtered = signups.filter(
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase()),
+      s.email.toLowerCase().includes(search.toLowerCase()) ||
+      (s.phone ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -607,9 +611,9 @@ function SignupListSection({
         <div className="overflow-x-auto">
           {/* Column headers */}
           <div
-            className="grid gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider"
+            className="grid gap-3 px-6 py-3 text-xs font-semibold uppercase tracking-wider"
             style={{
-              gridTemplateColumns: "40px 1fr 1fr 160px",
+              gridTemplateColumns: "36px 1fr 140px 1fr 150px",
               background: "oklch(1 0 0 / 0.03)",
               color: "oklch(1 0 0 / 0.35)",
               borderBottom: "1px solid oklch(1 0 0 / 0.06)",
@@ -619,6 +623,10 @@ function SignupListSection({
             <span>
               <User className="w-3 h-3 inline mr-1" />
               Name
+            </span>
+            <span>
+              <Phone className="w-3 h-3 inline mr-1" />
+              Phone
             </span>
             <span>
               <Mail className="w-3 h-3 inline mr-1" />
@@ -631,9 +639,9 @@ function SignupListSection({
           {filtered.map((signup, idx) => (
             <div
               key={`${signup.email}-${idx}`}
-              className="grid gap-4 px-6 py-4 transition-colors"
+              className="grid gap-3 px-6 py-4 transition-colors"
               style={{
-                gridTemplateColumns: "40px 1fr 1fr 160px",
+                gridTemplateColumns: "36px 1fr 140px 1fr 150px",
                 borderBottom: "1px solid oklch(1 0 0 / 0.04)",
               }}
               onMouseEnter={(e) => {
@@ -672,6 +680,16 @@ function SignupListSection({
                   {signup.name}
                 </span>
               </div>
+
+              {/* Phone */}
+              <span
+                className="text-sm font-mono"
+                style={{ color: "oklch(0.85 0.14 155)" }}
+              >
+                {signup.phone && signup.phone.trim() !== ""
+                  ? signup.phone
+                  : "—"}
+              </span>
 
               {/* Email */}
               <a
@@ -735,6 +753,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const signups: SignupRecord[] = (signupsRaw ?? []).map((s: any) => ({
     name: String(s.name ?? ""),
     email: String(s.email ?? ""),
+    phone: String(s.phone ?? ""),
     timestamp: BigInt(s.timestamp ?? 0),
   }));
 

@@ -13,10 +13,12 @@ export const Signup = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
   'timestamp' : Time,
+  'phone' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
   'addSignup' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'addSignupWithPhone' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'getSignupCount' : IDL.Func([], [IDL.Nat], ['query']),
   'getSignups' : IDL.Func([], [IDL.Vec(Signup)], ['query']),
 });
@@ -29,10 +31,12 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'email' : IDL.Text,
     'timestamp' : Time,
+    'phone' : IDL.Text,
   });
   
   return IDL.Service({
     'addSignup' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'addSignupWithPhone' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'getSignupCount' : IDL.Func([], [IDL.Nat], ['query']),
     'getSignups' : IDL.Func([], [IDL.Vec(Signup)], ['query']),
   });

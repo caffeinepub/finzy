@@ -34,7 +34,15 @@ export function useAddSignup() {
   actorRef.current = actor;
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ name, email }: { name: string; email: string }) => {
+    mutationFn: async ({
+      name,
+      email,
+      phone,
+    }: {
+      name: string;
+      email: string;
+      phone?: string;
+    }) => {
       // Wait up to 15s for actor to become available
       let resolvedActor = actorRef.current;
       if (!resolvedActor) {
@@ -46,6 +54,13 @@ export function useAddSignup() {
       }
       if (!resolvedActor)
         throw new Error("Unable to connect. Please refresh and try again.");
+      if (phone !== undefined && "addSignupWithPhone" in resolvedActor) {
+        return (resolvedActor as any).addSignupWithPhone(
+          name,
+          email,
+          phone ?? "",
+        );
+      }
       return resolvedActor.addSignup(name, email);
     },
     onSuccess: () => {

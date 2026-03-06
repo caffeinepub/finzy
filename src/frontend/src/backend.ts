@@ -93,10 +93,12 @@ export interface Signup {
     name: string;
     email: string;
     timestamp: Time;
+    phone: string;
 }
 export type Time = bigint;
 export interface backendInterface {
     addSignup(name: string, email: string): Promise<void>;
+    addSignupWithPhone(name: string, email: string, phone: string): Promise<void>;
     getSignupCount(): Promise<bigint>;
     getSignups(): Promise<Array<Signup>>;
 }
@@ -113,6 +115,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.addSignup(arg0, arg1);
+            return result;
+        }
+    }
+    async addSignupWithPhone(arg0: string, arg1: string, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addSignupWithPhone(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addSignupWithPhone(arg0, arg1, arg2);
             return result;
         }
     }

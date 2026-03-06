@@ -14,10 +14,12 @@ export interface Signup {
   'name' : string,
   'email' : string,
   'timestamp' : Time,
+  'phone' : string,
 }
 export type Time = bigint;
 export interface _SERVICE {
   'addSignup' : ActorMethod<[string, string], undefined>,
+  'addSignupWithPhone' : ActorMethod<[string, string, string], undefined>,
   'getSignupCount' : ActorMethod<[], bigint>,
   'getSignups' : ActorMethod<[], Array<Signup>>,
 }
